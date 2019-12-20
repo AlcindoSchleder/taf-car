@@ -8,13 +8,14 @@ from .forms import UserLoginForm
 
 
 class HomePageView(TemplateView):
+    template_name = 'home/index.html'
 
     def get(self, request, *args, **kwargs):
         # proto = 'https://'
         # if request.META['SERVER_PROTOCOL'] and request.META['SERVER_PROTOCOL'][0:5] == 'HTTP/':
         #     proto = 'http://'
         # server = proto + request.META['HTTP_HOST']
-        return render(request, 'index.html')
+        return render(request, self.template_name)
 
 
 class UserFormView(View):
@@ -25,7 +26,7 @@ class UserFormView(View):
         form = self.form_class(None)
 
         if request.user.is_authenticated:
-            return redirect('base:index')
+            return redirect('home:index')
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
@@ -38,6 +39,6 @@ class UserFormView(View):
                 if not request.POST.get('remember_me', None):
                     request.session.set_expiry(0)
                 login(request, user)
-                return redirect('base:index')
+                return redirect('home:index')
 
         return render(request, self.template_name, {'form': form})

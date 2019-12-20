@@ -1,12 +1,18 @@
 {% load static %}
 {% block footer %}
 	<footer class="footer">
-		<div class="container">
-			<div class="footer-logo"><a href="#"><img src="{% static 'img/footer-logo.png' %}" alt=""></a></div>
-			<span class="copyright">i-City AI Telecom</span>
-			<div class="credits">
-				Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-			</div>&copy; i-City - Todos os direitos reservados
+		<div class="container-fluid">
+			<div class="footer-logo float-right">
+				<a href="#"><img src="{% static 'img/footer-logo.png' %}" alt=""></a>
+			</div>
+			<div class="credits float-right">
+				Designed by <a href="https://www.icity.net.br">i-City Smart Environments</a>
+			</div>
+			<div class="float-none"></div>
+			<p class="copyright text-right">
+				<br />&copy; i-City - Todos os direitos reservados
+			</p>
+			<div class="float-none"></div>
 		</div>
 	</footer>
 {% endblock %}

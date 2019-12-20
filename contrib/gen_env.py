@@ -24,6 +24,6 @@ ALLOWED_HOSTS=127.0.0.1, .localhost
 """.strip() % get_random_string(64, chars)
 
 # Writing our configuration file to '.env'
-with open('.env', 'w') as configfile:
+with open('../.env', 'w') as configfile:
     configfile.write(CONFIG_STRING)
 

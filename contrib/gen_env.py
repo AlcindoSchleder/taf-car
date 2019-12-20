@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 """
@@ -20,7 +21,7 @@ ALLOWED_HOSTS=127.0.0.1, .localhost
 #EMAIL_USE_TLS=
 #EMAIL_HOST_USER=
 #EMAIL_HOST_PASSWORD=
-""".strip() % get_random_string(50, chars)
+""".strip() % get_random_string(64, chars)
 
 # Writing our configuration file to '.env'
 with open('.env', 'w') as configfile:

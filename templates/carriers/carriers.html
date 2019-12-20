@@ -1,0 +1,24 @@
+{%extends 'base.html'%}
+
+{%block title%}Alocar Caçambas{%endblock%}
+{%block content%}
+		<section class="content text-center">
+            <h2 class="carrier-title">Localização das Caçambas</h2>
+			<div class="carrier-box">
+                {% for level in levels %}
+                <div class="row">
+                    <div class="col-1"></div>
+                    {% for box in boxes %}
+                    <div class="boxes col-2 d-block">
+                        <div class="box-{{level}}-{{box}} box-level">
+                            <div class="box-pos box-pos-{{level}}-{{box}}">{{level}}.{{box}}</div>
+                            <div class="box-qtd box-text-{{level}}-{{box}}">0</div>
+                            <div class="box-id box-text-{{level}}-{{box}}">Não Alocada</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+			</div>
+		</section>
+{%endblock%}

@@ -1,0 +1,51 @@
+{%extends 'base.html'%}
+
+
+{%block title%}Taf - Login{%endblock%}
+
+{%block content%}
+    <section class="content login-box text-center">
+        <div class="card">
+            {% if not request.user.is_authenticated %}
+            <form class="form-login" id="login" method="POST">
+                {% csrf_token %}
+                <div class="msg">Digite seu nome de usuário e a senha para entrar
+                {% include 'home/form_error_msg.html' %}
+                </div>
+                {% for field in form %}
+                <div class="row text-center form-fields">
+                    <span class="col-3"></span>
+                    <span class="col-2"><i class="fas fa-user"></i>{{field.label}}</span>
+                    <span class="col-4">{{field}}</span>
+                </div>
+                {% endfor %}
+                <div class="row text-center btn-send">
+                    <div class="col-12">
+                        <button class="btn btn-outline-danger" type="submit">ENTRAR</button>
+                    </div>
+                </div>
+            </form>
+            {%endif%}
+            {% include 'home/modal.html' %}
+        </div>
+    </section>
+{%endblock%}
+
+
+{% block scripts %}
+
+    <!-- Mensagem caso sucesso ao solicitar troca de senha -->
+    {% if messages %}
+
+    {%for message in messages%}
+    {% if 'success' in message.tags %}
+
+    <script type="text/javascript">
+        $.Admin.messages.msgSucesso("{{message}}");
+    </script>
+    {%endif%}
+    {%endfor%}
+
+    {% endif %}
+
+{% endblock %}

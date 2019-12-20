@@ -3,8 +3,11 @@
 {%block title%}Seletor de Usuário{%endblock%}
 {%block content%}
 		<section class="content text-center">
+			<ul class="we-create">
+				<li>Separação de mercadorias Inteligente.</li>
+			</ul>
 			<div class="container">
-				<a class="link servicelink" href="login/login.html">Iniciar Agora</a>
+				<a class="link servicelink" href="{% url 'login:login' %}">Iniciar Agora</a>
 			</div>
 		</section>
 {%endblock%}

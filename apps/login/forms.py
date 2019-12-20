@@ -8,19 +8,17 @@ class UserLoginForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password')
+        fields = ('password', )
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control line-input', 'placeholder': 'Nome de usuário'}),
             'password': forms.PasswordInput(attrs={'class': 'form-control line-input', 'placeholder': 'Senha'}),
         }
         labels = {
-            'username': 'person',
-            'password': 'lock',
+            'password': 'Senha: ',
         }
 
     # Validar/autenticar campos de login
     def clean(self):
-        username = self.cleaned_data.get('username')
+        username = self.cleaned_data.get('password')
         password = self.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
         if not user or not user.is_active:

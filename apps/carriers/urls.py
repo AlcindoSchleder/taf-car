@@ -4,5 +4,5 @@ from .views import CarriersPageView
 
 app_name = 'carriers'
 urlpatterns = [
-    path('carriers', CarriersPageView.as_view(), name='carriers'),
+    path('', CarriersPageView.as_view(), name='carriers'),
 ]

@@ -1,0 +1,51 @@
+{%extends 'base.html'%}
+
+
+{%block title%}Taf - Cadastro de Operadores{%endblock%}
+
+{%block content%}
+    <section class="container login-box text-center">
+        {% if request.user.is_authenticated %}
+        <form class="form-register" id="register" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="flag_tuser" id="flag_tuser" value="4" />
+            <div class="msg">
+                Cadastro de Operadores do sistema:
+                {% include 'home/form_error_msg.html' %}
+            </div>
+            {% for field in form %}
+            <div class="row text-center form-fields">
+                <span class="col-3"></span>
+                <span class="col-2 fields-labels text-right"><i class="fas fa-user"></i>{{field.label}}</span>
+                <span class="col-4">{{field}}</span>
+            </div>
+            {% endfor %}
+            <div class="row text-center btn-send">
+                <div class="col-12">
+                    <button class="btn btn-outline-danger" type="submit">ENTRAR</button>
+                </div>
+            </div>
+        </form>
+        {%endif%}
+        {% include 'home/modal.html' %}
+    </section>
+{%endblock%}
+
+
+{% block scripts %}
+
+    <!-- Mensagem caso sucesso ao solicitar troca de senha -->
+    {% if messages %}
+
+    {%for message in messages%}
+    {% if 'success' in message.tags %}
+
+    <script type="text/javascript">
+        $.Admin.messages.msgSucesso("{{message}}");
+    </script>
+    {%endif%}
+    {%endfor%}
+
+    {% endif %}
+
+{% endblock %}

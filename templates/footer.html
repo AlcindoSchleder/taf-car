@@ -1,18 +1,21 @@
 {% load static %}
 {% block footer %}
-	<footer class="footer">
-		<div class="container-fluid">
-			<div class="footer-logo float-right">
+	<footer class="container">
+		<div class="row">
+			<figure class="footer-logo col-3">
 				<a href="#"><img src="{% static 'img/footer-logo.png' %}" alt=""></a>
+			</figure>
+			<div class="col-2 col-sm-2 col-md-4 col-lg-5 col-xl-5"></div>
+			<div class="col-7 col-sm-7 col-md-5 col-lg-4 col-xl-4">
+				<div class="row text-right copyright">
+					<div class="credits col-12">
+						Designed by <a href="https://www.icity.net.br">i-City Smart Environments</a>
+					</div>
+					<div class="col-12">
+						&copy; i-City - Todos os direitos reservados
+					</div>
+				</div>
 			</div>
-			<div class="credits float-right">
-				Designed by <a href="https://www.icity.net.br">i-City Smart Environments</a>
-			</div>
-			<div class="float-none"></div>
-			<p class="copyright text-right">
-				<br />&copy; i-City - Todos os direitos reservados
-			</p>
-			<div class="float-none"></div>
 		</div>
 	</footer>
 {% endblock %}

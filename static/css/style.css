@@ -1,223 +1,127 @@
 /*
-    Theme Name: Knight
-    Theme URL: https://bootstrapmade.com/knight-free-bootstrap-theme/
-    Author: BootstrapMade
-    Author URL: https://bootstrapmade.com
+    Theme Name: i-CitySmartCharger
+    Theme URL: https://icity.com.br/themes/smartcharger
+    Author: Alcindo Schleder
+    Author URL: https://icity.com.br
 */
 
-/* CSS Document - Reset all medias */
-@media all {
-    html {
-        padding: 0;
-        margin: 0;
-    }
-    body {
-        padding: 0;
-        margin: 0;
-    }
-    div {
-        padding: 0;
-        margin: 0;
-    }
-    section {
-        padding: 0;
-        margin: 0;
-    }
+/* CSS Document - Reset all medias
+-----------------------------------*/
+html {
+    padding: 0;
+    margin: 0;
 }
-
-/* Float Elements
----------------------------------*/
-.superscript {
-    vertical-align: super;
+body {
+    padding: 0;
+    margin: 0;
 }
-.subscript {
-    vertical-align: sub;
+div {
+    padding: 0;
+    margin: 0;
 }
-
-/* Clear Floated Elements
----------------------------------*/
-.figure{ margin:0px;}
-
-img{ max-width:100%;}
-
-a, a:hover, a:active{ outline:0px !important}
+section {
+    padding: 0;
+    margin: 0;
+}
+.figure{
+    margin:0px;
+}
+img {
+    max-width:100%;
+}
+a, a:hover, a:active {
+    outline:0px !important
+}
 
 /* Primary Styles
 ---------------------------------*/
 html {
-	font-size:16px;
+	font-size: 16px;
+	font-family: 'Montserrat', sans-serif;
+	font-weight: normal;
 }
 body {
 	background:url(../img/pw_maze_black_2X.png) left top repeat;
-	font-family: 'Open Sans', sans-serif;
 	font-size:1rem;
-	font-weight:normal;
-	color:#888888;
+	color:#888;
 	margin:0;
     height: 100vh;
     width: 100vw;
 }
-p{
-	line-height:1.5rem;
-	margin:0;
+h1 {
+	font-size: 3rem;
+	font-weight:700;
+}
+h2 {
+	font-size:2.2rem;
+	font-weight:700;
+}
+h3 {
+	font-size:1.5rem;
+	font-weight:400;
+}
+h4 {
+	font-size:1.2rem;
+	font-weight:400;
+}
+h5 {
+	font-size:0.8rem;
+	font-weight:300;
+}
+h6 {
+	font-size:0.5rem;
+	font-weight:300;
 }
 /* Header Styles
 ---------------------------------*/
-
-.title-h2 {
-	font-size:1.1rem;
-	color:#222222;
-	font-family: 'Montserrat', sans-serif;
-	font-weight:700;
-	letter-spacing: -1px;
-	margin:0;
-	padding:0;
-	text-transform:uppercase;
-}
-.title-h3 {
-	font-family: 'Montserrat', sans-serif;
-	color:#222222;
-	font-size:1.3rem;
-	margin:0;
-	padding:0;
-	text-transform:uppercase;
-	font-weight:400;
-}
-.title-h4 {
-	font-size:1rem;
-	color:#888888;
-	font-family: 'Open Sans', sans-serif;
-	font-weight:400;
-	margin:0;
-	padding:0;
-}
-.title-h5 {
-	font-size:0.8rem;
-	color:#888888;
-	font-family: 'Open Sans', sans-serif;
-	font-weight:400;
-	margin:0;
-	padding:0;
-}
-.title-h6 {
-	font-size:0.5rem;
-	color:#888888;
-	font-family: 'Open Sans', sans-serif;
-	font-weight:400;
-	margin:0;
-	padding:0;
-}
-
-.header{
-    padding-top: 5vh;
-	height: 20vh;
+header {
+    display: block;
+    padding-top: 3vh;
+	height: auto;
     width: 100vw;
 }
-.logo{
-	width:18vw;
-	margin:0 auto 35px;
-}
-.header h1{
-	font-family: 'Montserrat',sans-serif;
-	font-size:3.1rem;
-	font-weight:400;
-	letter-spacing: -1px;
-	margin:0 0 22px 0 ;
-	color:#fff;
-}
-
-.we-create{
-	padding:0;
-	margin:35px 0 55px;
-}
-.wp-pic{
-	margin-bottom:20px;
-}
-.we-create li{
-	display:inline-block;
-	font-family: 'Montserrat',sans-serif;
-	font-size:0.9rem;
-	color: #bcbcbc;
+header .sub-title {
+	font-size: 1.5rem;
 	text-transform: uppercase;
-	font-weight: 400;
-	margin:0 5px 0 0;
-	padding:0 0 0 15px;
 }
-.we-create li:first-child{
-	background:none;
-}
-
-.start-button {
-	padding-left: 0px;
-}
-
-.start-button li a{
-color: #fff;
-}
-
 
 /* Content
 ---------------------------------*/
-.content {
+/* Main Page */
+.main-page {
     height: 65vh;
     width: 100vw;
-    overflow: hidden;
+	text-transform: uppercase;
 }
-.link{
-	padding:10px 35px;
-	background:#7cc576;
-	color:#fff !important;
-	font-size:1rem;
-	font-weight:400;
-	font-family: 'Montserrat', sans-serif;
-	display:inline-block;
-	border-radius:3px;
-	text-transform:uppercase;
-	line-height:25px;
-	margin-bottom:20px;
-	transition:all 0.3s ease-in-out;
-	-moz-transition:all 0.3s ease-in-out;
-	-webkit-transition:all 0.3s ease-in-out;
-}
-.link:hover {
-	text-decoration:none;
-	color:#7cc576 !important;
-	background:#fff;
-}
-.link:active, .link:focus {
-	background: #7cc576;
-	text-decoration:none;
-	color:#fff !important;
+.main-page .title {
+    padding: 1rem 1rem;
 }
 
-/* Form login
----------------------------------*/
+/* Form Login */
 .login-box {
     padding-top: 20vh;
-    overflow: hidden;
-}
-.card {
-    background: transparent;
+    height: 80vh;
 }
 .form-login .msg {
-    padding: 10px;
+    margin-top: 10px;
     color: #fff;
 }
 .form-login .form-fields {
-    padding-top: 10px;
+    margin-bottom: 10px;
 }
 .form-login .btn-send {
-    padding-top: 20px;
+    margin-top: 20px;
 }
-/* Carrier Boxes
----------------------------------*/
-.carrier-title {
-    height: 5%;
+
+
+/* Carrier Boxes */
+.carrier-blocks {
+}
+.carrier-blocks img {
+    margin-top: 15vh;
 }
 .carrier-box {
-    margin: 0 2%;
     padding: 1%;
-    border: 1px solid yellow;
     height: 85%;
     width: 95%;
     border-radius: 5px;
@@ -227,51 +131,78 @@ color: #fff;
     background-color: #ccc;
     margin: 0 5px 10px 0;
     border-radius: 5px;
-    height: 20%;
+    height: 250px;
+    width: 19%;
 }
 .boxes .box-pos {
     margin: 0;
     padding: 0;
     color: #fff;
-    font-size: 1.0rem;
+    font-size: 1.5rem;
     font-weight: bold;
 }
 .boxes .box-qtd {
     padding: 0;
     color: #f00;
-    font-size: 3rem;
+    font-size: 4rem;
     font-weight: bold;
 }
 .boxes .box-id {
     margin: 0;
     color: #00f;
-    font-size: 0.8rem;
+    font-size: 1.2rem;
 }
 /* Footer
 ---------------------------------*/
-.footer{
-    height: 10vh;
+footer {
+    display: block;
+    height: auto;
     width: 100vw;
-}
-.footer-logo{
-	width: 100px;
-}
-.copyright, .credits{
     padding: 0;
     margin: 0;
-	color:#cccccc;
-	font-size:0.8rem;
-	display:block;
 }
-.copyright a, .credits a{
-	color:#7cc576;
-	font-weight:600;
+footer .copyright {
+    display: block;
+    padding-top: 1.5rem;
+    margin: 0;
+	color : #ccc;
+	font-size: 0.8rem;
+	display: block;
+}
+footer .copyright .credits a{
+	color: #7cc576;
+	font-weight: 600;
 	text-decoration: none;
-	transition:all 0.3s ease-in-out;
-	-moz-transition:all 0.3s ease-in-out;
-	-webkit-transition:all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+	-moz-transition: all 0.3s ease-in-out;
+	-webkit-transition: all 0.3s ease-in-out;
 }
-
-.copyright a:hover, .credits a:hover {
+footer .copyright .credits a:hover {
 	color: #fff;
+}
+@media only screen and (max-width: 800px) and (max-height: 480px) {
+    header {
+        display: none;
+    }
+    .main-page {
+        height: 40vh;
+        width: 100vw;
+        text-transform: uppercase;
+    }
+    .login-box {
+        padding-top: 10vh;
+        height: 65vh;
+    }
+    .boxes {
+        height: 140px;
+    }
+    .boxes .box-pos {
+        font-size: 1.0rem;
+    }
+    .boxes .box-qtd {
+        font-size: 3rem;
+    }
+    .boxes .box-id {
+        font-size: 0.8rem;
+    }
 }

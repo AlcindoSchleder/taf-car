@@ -4,12 +4,12 @@
 {%block title%}Taf - Login{%endblock%}
 
 {%block content%}
-    <section class="content login-box text-center">
+    <section class="container login-box text-center">
         <div class="card">
             {% if not request.user.is_authenticated %}
             <form class="form-login" id="login" method="POST">
                 {% csrf_token %}
-                <div class="msg">Digite seu nome de usuário e a senha para entrar
+                <div class="msg">Digite seu código de usuário para entrar:
                 {% include 'home/form_error_msg.html' %}
                 </div>
                 {% for field in form %}

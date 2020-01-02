@@ -1,13 +1,18 @@
 {%extends 'base.html'%}
 
-{%block title%}Seletor de Usuário{%endblock%}
-{%block content%}
-		<section class="content text-center">
-			<ul class="we-create">
-				<li>Separação de mercadorias Inteligente.</li>
-			</ul>
-			<div class="container">
-				<a class="link servicelink" href="{% url 'login:login' %}">Iniciar Agora</a>
+	{%block title%}Seletor de Usuário{%endblock%}
+	{%block content%}
+		<section class="main-page container text-center">
+			<div class="row">
+				<div class="title h5 col-12">Separação de mercadorias Inteligente</div>
+			</div>
+			<div class="row">
+				<div class="col-4"></div>
+				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar Agora</a>
+				<div class="col-4"></div>
 			</div>
 		</section>
-{%endblock%}
+	{%endblock%}
+	{% block footer %}
+		{% include 'footer.html' %}
+	{% endblock %}

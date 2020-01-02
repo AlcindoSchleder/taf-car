@@ -1,7 +1,8 @@
 from django.contrib.auth import login
 from django.views.generic import View
 from django.shortcuts import render, redirect
-from .forms import UserLoginForm
+from .forms import UserLoginForm, CollectorRegisterForm
+from .models import UsersOperation
 
 
 class UserFormView(View):
@@ -12,7 +13,7 @@ class UserFormView(View):
         form = self.form_class(None)
 
         if request.user.is_authenticated:
-            return redirect('home:index')
+            return redirect('home:home')
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
@@ -23,6 +24,37 @@ class UserFormView(View):
             user = form.authenticate_user(username=username, password=password)
             if user:
                 login(request, user)
-                return redirect('carriers:index')
+                return redirect('carriers:carriers')
 
         return render(request, self.template_name, {'form': form})
+
+
+class CollectorRegisterView(View):
+    form_class = CollectorRegisterForm
+    template_name = 'login/signup.html'
+
+    def get(self, request):
+        form = self.form_class(None)
+
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        if request.method == 'POST':
+            form = self.form_class(request.POST)
+            if form.is_valid():
+                user = form.save()
+                user.refresh_from_db()
+                user.profile.first_name = form.cleaned_data.get('first_name')
+                user.profile.last_name = form.cleaned_data.get('last_name')
+                user.profile.email = form.cleaned_data.get('email')
+                # user can't login until get a new Activity
+                user.is_active = False
+                user.save()
+                UsersOperation.flag_tuser = 4
+                UsersOperation.user_integration = form.cleaned_data.get('username')
+                UsersOperation.save()
+        else:
+            form = self.form_class()
+        return render(request, 'signup.html', {'form': form})

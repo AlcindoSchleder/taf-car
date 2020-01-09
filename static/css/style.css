@@ -115,6 +115,13 @@ header .sub-title {
 
 
 /* Carrier Boxes */
+.carrier-title {
+    background-color: #d4f2fa;
+    color: #00f;
+    font-weight: bolder;
+    padding: 5px;
+}
+
 .carrier-blocks {
 }
 .carrier-blocks img {
@@ -137,9 +144,9 @@ header .sub-title {
 .boxes .box-pos {
     margin: 0;
     padding: 0;
-    color: #fff;
+    color: #000;
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 800;
 }
 .boxes .box-qtd {
     padding: 0;

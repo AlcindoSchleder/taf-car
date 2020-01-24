@@ -3,15 +3,15 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .models import UsersOperation
-
-# -*- coding: utf-8 -*-
-from django import forms
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from .models import UsersOperation
+import requests
 
 
 class UserLoginForm(forms.ModelForm):
+    username = None
+    password = None
+    flag_ins = False
+
+    HTTP_API_GET_OPERATOR = 'http://192.168.0.203:5180/tafApi/login/1.0'
 
     class Meta:
         model = User
@@ -25,17 +25,33 @@ class UserLoginForm(forms.ModelForm):
 
     # Validar/autenticar campos de login
     def clean(self):
-        username = self.cleaned_data.get('password')
-        password = self.cleaned_data.get('password')
-        user = authenticate(username=username, password=password)
+        self.flag_ins = False
+        self.username = self.cleaned_data.get('password')
+        self.password = self.cleaned_data.get('password')
+        user = authenticate(username=self.username, password=self.password)
         if not user or not user.is_active:
-            raise forms.ValidationError("Usuário ou senha inválidos.")
+            self.flag_ins = True
         return self.cleaned_data
 
-    def authenticate_user(self, username, password):
+    def is_valid(self):
+        self.flag_ins = False
+        valid = super(UserLoginForm, self).is_valid()
+        if not valid:
+            self.flag_ins = True
+        return valid
+
+    def authenticate_user(self, username=None, password=None):
+        self.flag_ins = False
+        username = username if username else self.username
+        password = password if password else self.password
+
         user = authenticate(username=username, password=password)
-        if not user or not user.is_active:
-            raise forms.ValidationError("Usuário ou senha inválidos.")
+        if not user:
+            res = requests.get(f'{self.HTTP_API_GET_OPERATOR}/{username}')
+            if res.status_code == 200:
+                res = res.json()
+                if str(res['records'][0]['codprodutivo']) == password:
+                    self.flag_ins = True
         return user
 
 

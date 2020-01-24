@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.home',
     'apps.login',
     'apps.carriers',
+    'apps.display',
 ]
 
 MIDDLEWARE = [

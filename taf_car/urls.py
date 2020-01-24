@@ -11,4 +11,5 @@ urlpatterns = [
     path('', include('apps.home.urls', 'home')),
     path('login/', include('apps.login.urls', 'login')),
     path('carriers/', include('apps.carriers.urls', 'carriers')),
+    path('display/', include('apps.display.urls', 'display')),
 ]

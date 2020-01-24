@@ -13,7 +13,7 @@ class UserFormView(View):
         form = self.form_class(None)
 
         if request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect('carriers:carriers')
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
@@ -22,9 +22,11 @@ class UserFormView(View):
             username = form.cleaned_data['password']
             password = form.cleaned_data['password']
             user = form.authenticate_user(username=username, password=password)
-            if user:
+            if user is not None:
                 login(request, user)
                 return redirect('carriers:carriers')
+            elif form.flag_ins:
+                return redirect('login:signup')
 
         return render(request, self.template_name, {'form': form})
 
@@ -36,8 +38,8 @@ class CollectorRegisterView(View):
     def get(self, request):
         form = self.form_class(None)
 
-        if not request.user.is_authenticated:
-            return redirect('home:home')
+        if request.user.is_authenticated:
+            return redirect('carriers:carriers')
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):

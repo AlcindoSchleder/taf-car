@@ -1,0 +1,27 @@
+{%extends 'base.html'%}
+
+	{% load static %}
+	{%block title%}CarDisplays{%endblock%}
+	{%block content%}
+		<div class="shadow-page d-none"></div>
+		<section class="main-page container text-center">
+			<div class="row">
+				<div class="col-3 h-100 mt-2">
+					<figure class="img-prod">
+						<img src="{% static 'display/img/prod.png' %}" alt="Imagens do Produto">
+					</figure>
+					<figure class="img-copyright">
+						<img src="{% static 'display/img/small-logo.png' %}" alt="Marca i-City">
+					</figure>
+				</div>
+				<div class="col-9 text-white mt-2">
+					<div class="box">
+						<div class="descr-prod h4">sem produtos</div>
+						<div class="label-qtd mt-3">QTD:</div>
+						<div class="qtd-prod text-danger">0</div>
+						<div class="box-position h3 font-weight-bolder">Caçamba: 1.1-000000</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	{%endblock%}

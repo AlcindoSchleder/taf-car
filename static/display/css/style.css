@@ -105,12 +105,10 @@ header .sub-title {
 /* Images Boxes */
 /* Text Boxes */
 .control-qtd {
-    display: inline-block;
     height: 6rem;
     vertical-align: middle;
     line-height: 6rem;
     text-align: center;
-    width: 100%;
 }
 .control-qtd .label-qtd {
     font-size: 2rem;

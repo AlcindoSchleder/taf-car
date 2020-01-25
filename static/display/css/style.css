@@ -104,18 +104,19 @@ header .sub-title {
 
 /* Images Boxes */
 /* Text Boxes */
+.label-prod {
+    font-size: 3rem;
+}
 .qtd-prod {
     font-size: 6rem;
     font-weight: bolder;
 }
-
 .carrier-title {
     background-color: #d4f2fa;
     color: #00f;
     font-weight: bolder;
     padding: 5px;
 }
-
 .carrier-blocks {
 }
 .carrier-blocks img {

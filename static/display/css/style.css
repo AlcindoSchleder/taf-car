@@ -104,12 +104,18 @@ header .sub-title {
 
 /* Images Boxes */
 /* Text Boxes */
-.label-prod {
-    font-size: 2rem;
-    line-height: 6rem;
+.qtd-control {
+    display: inline-block;
+    width: 100%;
+    height: 6rem;
     vertical-align: middle;
+    line-height: 6rem;
+    text-align: center;
 }
-.qtd-prod {
+.label-qtd {
+    font-size: 2rem;
+}
+.field-qtd {
     font-size: 6rem;
     font-weight: bolder;
 }

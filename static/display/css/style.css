@@ -105,8 +105,9 @@ header .sub-title {
 /* Images Boxes */
 /* Text Boxes */
 .label-prod {
-    font-size: 3rem;
+    font-size: 2rem;
     line-height: 6rem;
+    vertical-align: middle;
 }
 .qtd-prod {
     font-size: 6rem;

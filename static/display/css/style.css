@@ -110,13 +110,16 @@ header .sub-title {
     vertical-align: middle;
     line-height: 6rem;
     text-align: center;
+    width: 100%;
 }
-.label-qtd {
+.qtd-control .label-qtd {
     font-size: 2rem;
+    width: auto;
 }
-.field-qtd {
+.qtd-control .field-qtd {
     font-size: 6rem;
     font-weight: bolder;
+    width: auto;
 }
 .carrier-title {
     background-color: #d4f2fa;

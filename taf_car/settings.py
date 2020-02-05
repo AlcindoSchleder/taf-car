@@ -85,6 +85,10 @@ DATABASES = {
     }
 }
 
+API_URLS = {
+    'local': '192.168.0.203',
+    'remote': '189.90.56.210',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -117,7 +121,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

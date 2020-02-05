@@ -2,7 +2,7 @@ from django.contrib.auth import login
 from django.views.generic import View
 from django.shortcuts import render, redirect
 from .forms import UserLoginForm, CollectorRegisterForm
-from .models import UsersOperation
+from .models import UsersOperators
 
 
 class UserFormView(View):
@@ -14,7 +14,7 @@ class UserFormView(View):
 
         if request.user.is_authenticated:
             return redirect('carriers:carriers')
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {'form': form, 'data': data})
 
     def post(self, request):
         form = self.form_class(request.POST or None)
@@ -54,9 +54,13 @@ class CollectorRegisterView(View):
                 # user can't login until get a new Activity
                 user.is_active = False
                 user.save()
-                UsersOperation.flag_tuser = 4
-                UsersOperation.user_integration = form.cleaned_data.get('username')
-                UsersOperation.save()
+                UsersOperators.flag_tuser = 4
+                UsersOperators.user_integration = form.cleaned_data.get('username')
+                UsersOperators.save()
+                # TODO: 1) get user permissions and save it.
+                #       2) Verify if user has activities and hour initial / hour end
+                #       3) Yes: redirect to carriers
+                #       4) No: render a message that user not has a activity to do
         else:
             form = self.form_class()
         return render(request, 'signup.html', {'form': form})

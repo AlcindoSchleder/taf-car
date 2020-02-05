@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .models import UsersOperation
+from .models import UsersOperators
 import requests
 
 
@@ -63,5 +63,5 @@ class CollectorRegisterForm(forms.ModelForm):
     email = forms.EmailField(max_length=150, label='e-Mail', help_text='e-Mail')
 
     class Meta:
-        model = UsersOperation
+        model = UsersOperators
         fields = ('user_integration', 'first_name', 'last_name', 'email', )

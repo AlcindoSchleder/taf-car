@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.contrib.auth.models import User
+from apps.home.models import Cars
 
 
 class UsersOperators(models.Model):
@@ -40,7 +41,8 @@ class UsersOperators(models.Model):
     )
     horinijornada = models.TimeField(verbose_name='Hora início')
     horfimjornada = models.TimeField(verbose_name='Hora Fim')
-    insert_date =  models.DateTimeField(verbose_name='Data e Hora da Inserção')
+    fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro Alocado')
+    insert_date = models.DateTimeField(verbose_name='Data e Hora da Inserção')
 
     class Meta:
         db_table = 'user_operators'
@@ -60,5 +62,3 @@ class UsersOperatorsPermissions(models.Model):
 
     class Meta:
         db_table = 'user_permissions'
-
-

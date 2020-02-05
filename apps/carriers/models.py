@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from apps.home.models import Cars, CarsBoxes
 
 
 class CarriersProducts(models.Model):
@@ -91,6 +92,19 @@ class CarriersProducts(models.Model):
     qtdembcarga = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Qtd. Emb.')
     qtdembsepcarga = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Qtd. Emb. Separada')
     nropedvenda = models.IntegerField(null=True, blank=True, verbose_name='Número Pedido')
+    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data')
 
     class Meta:
         db_table = 'cargo_products'
+
+
+class CarriersProductsCars(models.Model):
+    # this field is a hash of the box id, barcode, order_number and customer order id
+    pk_products_cars = models.CharField(max_length=64, primary_key=True, verbose_name='Box')
+    fk_carriers_products = models.ForeignKey(CarriersProducts, on_delete=models.CASCADE, verbose_name='Produto')
+    fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
+    fk_cars_boxes = models.ForeignKey(CarsBoxes, on_delete=models.PROTECT, verbose_name='Box')
+    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data')
+
+    class Meta:
+        db_table = 'carriers_products_cars'

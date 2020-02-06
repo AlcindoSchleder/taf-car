@@ -13,6 +13,10 @@
                     <img src="{% static 'img/prod.png' %}" alt="product" />
                 </div>
                 <div class="carrier-box col-10">
+                {% if loadbox %}
+                <form id="form_boxes" method="POST">
+                    {% csrf_token %}
+                {% endif %}
                 {% for level in levels %}
                     {% for box in boxes %}
                     <div class="boxes d-block float-left">
@@ -20,12 +24,22 @@
                             <div class="box-pos box-pos-{{level}}-{{box}}">{{level}}.{{box}}</div>
                             <div class="box-qtd box-text-{{level}}kl
                             -{{box}}">0</div>
-                            <div class="box-id box-text-{{level}}-{{box}}">Não Alocada</div>
+                            <div class="box-id box-text-{{level}}-{{box}}">
+                                {% if loadbox %}
+                                <input type="text" maxlength="20" name="in_{{level}}_{{box}}" id="in_{{level}}_{{box}}" required />
+                                {% else %}
+                                Box {{boxesid}} {{loadbox}}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
                 {% endfor %}
+                </form>
     			</div>
 			</div>
 		</section>
 {%endblock%}
+	{% block scripts %}
+    <script src="{% static 'js/index.js' %}"></script>
+	{% endblock %}

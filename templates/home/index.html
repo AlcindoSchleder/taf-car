@@ -8,7 +8,12 @@
 			</div>
 			<div class="row">
 				<div class="col-4"></div>
-				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar Agora</a>
+				{% if not loaded %}
+				<a class="col-4 link btn btn-success service-link" href="{% url 'carriers:carriers' %}?carid={{CAR_ID}}&load_boxes=true">Alocar Caçambas no Carro</a>
+				{% endif %}
+				{% if carid > 0 %}
+				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}?carid={{CAR_ID}}">Iniciar o Carro {{CAR_ID}}</a>
+				{% endif %}
 				<div class="col-4"></div>
 			</div>
 		</section>

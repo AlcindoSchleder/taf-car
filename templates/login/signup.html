@@ -5,24 +5,24 @@
 
 {%block content%}
     <section class="container login-box text-center">
-        {% if request.user.is_authenticated %}
+        {% if carid > 0 and not request.user.is_authenticated %}
         <form class="form-register" id="register" method="POST">
             {% csrf_token %}
             <input type="hidden" name="flag_tuser" id="flag_tuser" value="4" />
-            <div class="msg">
+            <div class="msg m-5 h3">
                 Cadastro de Operadores do sistema:
                 {% include 'home/form_error_msg.html' %}
             </div>
             {% for field in form %}
-            <div class="row text-center form-fields">
-                <span class="col-3"></span>
-                <span class="col-2 fields-labels text-right"><i class="fas fa-user"></i>{{field.label}}</span>
-                <span class="col-4">{{field}}</span>
+            <div class="row text-center form-group">
+                <div class="col-2"></div>
+                <div class="col-3 text-right"><i class="fa fa-user"></i>{{field.label}}: </div>
+                <div class="col-3">{{field}}</div>
             </div>
             {% endfor %}
-            <div class="row text-center btn-send">
+            <div class="row text-center btn-send m-3">
                 <div class="col-12">
-                    <button class="btn btn-outline-danger" type="submit">ENTRAR</button>
+                    <button class="btn btn-outline-danger" type="submit">SALVAR</button>
                 </div>
             </div>
         </form>

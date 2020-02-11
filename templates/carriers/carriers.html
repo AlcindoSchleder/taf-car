@@ -6,29 +6,28 @@
 		<section class="container-fluid text-center">
             <div class="row">
                 <div class="col-2"></div>
-                <h3 class="carrier-title col-10">Localização das Caçambas</h3>
+                <h3 class="carrier-title col-10">Localização das Caçambas! <span class="text-danger">{{msg_validate}}</span></h3>
             </div>
             <div class="row carrier-blocks">
                 <div class="col-2">
                     <img src="{% static 'img/prod.png' %}" alt="product" />
                 </div>
                 <div class="carrier-box col-10">
-                {% if loadbox %}
+                {% if not prepared %}
                 <form id="form_boxes" method="POST">
                     {% csrf_token %}
                 {% endif %}
-                {% for level in levels %}
-                    {% for box in boxes %}
+                {% for level_key, level_value in boxes.items %}
+                    {% for box_key, box_value in level_value.items %}
                     <div class="boxes d-block float-left">
-                        <div class="box-{{level}}-{{box}} box-level">
-                            <div class="box-pos box-pos-{{level}}-{{box}}">{{level}}.{{box}}</div>
-                            <div class="box-qtd box-text-{{level}}kl
-                            -{{box}}">0</div>
-                            <div class="box-id box-text-{{level}}-{{box}}">
-                                {% if loadbox %}
-                                <input type="text" maxlength="20" name="in_{{level}}_{{box}}" id="in_{{level}}_{{box}}" required />
+                        <div class="box-{{level_key}}{{box_key}} box-level">
+                            <div class="box-pos box-pos{{level_key}}{{box_key}}">{{level_key}}.{{box_key}}</div>
+                            <div class="box-qtd box-qtd{{level_key}}{{box_key}}">0</div>
+                            <div class="box-id box-id{{level_key}}{{box_key}}">
+                                {% if not prepared %}
+                                <input type="text" maxlength="20" name="e{{level_key}}{{box_key}}" id="e{{level_key}}{{box_key}}" value="{{box_value}}" />
                                 {% else %}
-                                Box {{boxesid}} {{loadbox}}
+                                Box {{level_key}}.{{box_key}}: {{box_value}}
                                 {% endif %}
                             </div>
                         </div>

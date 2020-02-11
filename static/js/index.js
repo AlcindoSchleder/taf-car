@@ -28,11 +28,13 @@ var IndexEvents = function () {
                 if (idx == inputs.length - 1) {
                     $('#form_boxes').submit() // validate and save form
                 } else {
-                    inputs[idx + 1].focus(); //  handles submit buttons
+                    inputs[idx + 1].focus();
                     inputs[idx + 1].select();
                 }
                 return false;
         });
+        $('#e21').select()
+        $('#e21').focus()
     };
     var handleDynamicLinks = function () {
         $('.main-nav li a, .servicelink').bind('click', function(event) {

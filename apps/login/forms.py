@@ -3,15 +3,18 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .models import UsersOperators
-import requests
+from data_control.api import ApiHostAccess
+
+api = ApiHostAccess({})
 
 
 class UserLoginForm(forms.ModelForm):
     username = None
     password = None
     flag_ins = False
+    result = api.result
 
-    HTTP_API_GET_OPERATOR = 'http://192.168.0.203:5180/tafApi/login/1.0'
+    HTTP_API_GET_OPERATOR = 'tafApi/login/1.0'
 
     class Meta:
         model = User
@@ -47,11 +50,19 @@ class UserLoginForm(forms.ModelForm):
 
         user = authenticate(username=username, password=password)
         if not user:
-            res = requests.get(f'{self.HTTP_API_GET_OPERATOR}/{username}')
-            if res.status_code == 200:
-                res = res.json()
-                if str(res['records'][0]['codprodutivo']) == password:
-                    self.flag_ins = True
+            try:
+                api.set_end_points({'login': f'/{self.HTTP_API_GET_OPERATOR}/{username}'})
+                res = api.get_data('login')
+                if res['status']['sttCode'] == 200:
+                    res = res['data']
+                    if len(res['records']) > 0 and str(res['records'][0]['codprodutivo']) == password:
+                        self.flag_ins = True
+                        self.result['records'] = res['records']
+                        self.result['flag_ins'] = self.flag_ins
+                else:
+                    self.result = res
+            except Exception as e:
+                raise e
         return user
 
 

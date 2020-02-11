@@ -53,8 +53,7 @@ class UsersOperatorsPermissions(models.Model):
         ('A', 'Ativa'),
         ('I', 'Inativa'),
     ]
-    pk_user_permissions = models.AutoField(primary_key=True, verbose_name='Permissões')
-    fk_users = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Código')
+    pk_user_permissions = models.CharField(max_length=30, primary_key=True, verbose_name='User-Permisson')
     codlinhasepar = models.CharField(max_length=2, verbose_name='Linha de Separação')
     desclinhasepar = models.CharField(max_length=50, verbose_name='Descrição')
     indseparacao = models.CharField(max_length=1, verbose_name='descrição')

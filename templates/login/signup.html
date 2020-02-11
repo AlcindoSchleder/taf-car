@@ -8,7 +8,6 @@
         {% if carid > 0 and not request.user.is_authenticated %}
         <form class="form-register" id="register" method="POST">
             {% csrf_token %}
-            <input type="hidden" name="flag_tuser" id="flag_tuser" value="4" />
             <div class="msg m-5 h3">
                 Cadastro de Operadores do sistema:
                 {% include 'home/form_error_msg.html' %}

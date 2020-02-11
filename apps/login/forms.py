@@ -67,7 +67,6 @@ class UserLoginForm(forms.ModelForm):
 
 
 class CollectorRegisterForm(forms.ModelForm):
-    flag_tuser = forms.HiddenInput()
     user_integration = forms.IntegerField(label='Código no E.R.P.', help_text='Código no E.R.P.')
     first_name = forms.CharField(max_length=100, label='Primeiro Nome', help_text='Primeiro Nome')
     last_name = forms.CharField(max_length=100, label='Sobrenome', help_text='Sobrenome')

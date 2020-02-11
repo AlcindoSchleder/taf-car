@@ -11,6 +11,8 @@ BOX_MAX_WEIGHT = 30000  # peso máximo da caixa em gr
 BOX_MAX_VOLUME = 0.072  # volume máximo da caixa em m3
 VOLUME_PERCENT = 30     # percentual do volume para juntar 2 pedidos na mesma caixa
 
+USER_NAME = None
+USER_DATA = None
 USER_PERMISSIONS = []
 
 

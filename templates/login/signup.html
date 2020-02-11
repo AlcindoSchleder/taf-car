@@ -8,7 +8,7 @@
         {% if carid > 0 and not request.user.is_authenticated %}
         <form class="form-register" id="register" method="POST">
             {% csrf_token %}
-            <div class="msg m-5 h3">
+            <div class="msg mb-5 h3">
                 Cadastro de Operadores do sistema:
                 {% include 'home/form_error_msg.html' %}
             </div>

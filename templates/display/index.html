@@ -3,7 +3,7 @@
 	{% load static %}
 	{%block title%}CarDisplays{%endblock%}
 	{%block content%}
-		<div class="shadow-page d-none"></div>
+		<div class="shadow-page"></div>
 		<section class="main-page container text-center">
 			<div class="row">
 				<div class="col-3 h-100 mt-2">
@@ -27,3 +27,6 @@
 			</div>
 		</section>
 	{%endblock%}
+	{% block scripts %}
+    <script src="{% static 'js/disaplay.js' %}"></script>
+	{% endblock %}

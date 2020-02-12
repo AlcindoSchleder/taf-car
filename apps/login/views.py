@@ -1,4 +1,5 @@
 import apps
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth import login
 from django.views.generic import View
 from django.shortcuts import render, redirect
@@ -57,65 +58,74 @@ class CollectorRegisterView(View):
             return redirect('carriers:carriers')
         return render(request, self.template_name, {'form': form, 'carid': apps.CAR_ID})
 
+    def save_user_operators(self, form):
+        operator = form.save(commit=False)
+        cars = Cars.objects.get(pk=apps.CAR_ID)
+        # operator = UsersOperators()
+        operator.first_name = form.cleaned_data.get('first_name')
+        operator.last_name = form.cleaned_data.get('last_name')
+        operator.email = form.cleaned_data.get('email')
+        operator.flag_tuser = 4
+        operator.user_integration = form.cleaned_data.get('username')
+        # Fields get from external API
+        operator.fk_cars = cars
+        operator.nroempresa = self.user_data['records'][0]['nroempresa']
+        operator.tipprodutivo = self.user_data['records'][0]['tipprodutivo']
+        operator.statusprodutivo = self.user_data['records'][0]['statusprodutivo']
+        operator.inddisponibilidade = self.user_data['records'][0]['inddisponibilidade']
+        operator.user_integration = apps.USER_NAME
+        clock = datetime.time(datetime.strptime(
+            self.user_data['records'][0]['horinijornada'], '%H%M'
+        ))
+        operator.horinijornada = clock
+        clock = datetime.time(datetime.strptime(
+            self.user_data['records'][0]['horfimjornada'], '%H%M'
+        ))
+        operator.horfimjornada = clock
+        # Save User into django auth
+        user = User()
+        user.username = apps.USER_NAME
+        user.password = make_password(apps.USER_NAME)
+        user.first_name = form.cleaned_data.get('first_name')
+        user.last_name = form.cleaned_data.get('last_name')
+        user.email = form.cleaned_data.get('email')
+        # user can't login until get a new Activity
+        user.is_active = True
+        user.save()
+        user.refresh_from_db()
+        # Save operator Data
+        operator.save()
+        return operator
+
+    def check_operator_rules(self, operator) -> str:
+        # Check operator
+        message = ''
+        if operator.horinijornada < time or operator.horfimjornada > time:
+            message = 'Usuário não está no horário de serviço!'
+            message += f'(início: {operator.horinijornada} - fim: {operator.horfimjornada})'
+        if operator.inddisponibilidade == 'N':
+            message = 'Usuário não está disponível no momentp!'
+            message += f'(flag disponivel: {operator.inddisponibilidade})'
+        return message
+
     def post(self, request):
         self.user_data = apps.USER_DATA
         if request.method == 'POST':
             form = self.form_class(request.POST)
             if form.is_valid():
-                operator = form.save(commit=False)
-                cars = Cars.objects.get(pk=apps.CAR_ID)
-                # operator = UsersOperators()
-                operator.first_name = form.cleaned_data.get('first_name')
-                operator.last_name = form.cleaned_data.get('last_name')
-                operator.email = form.cleaned_data.get('email')
-                operator.flag_tuser = 4
-                operator.user_integration = form.cleaned_data.get('username')
-                # Fields get from external API
-                operator.fk_cars = cars
-                operator.nroempresa = self.user_data['records'][0]['nroempresa']
-                operator.tipprodutivo = self.user_data['records'][0]['tipprodutivo']
-                operator.statusprodutivo = self.user_data['records'][0]['statusprodutivo']
-                operator.inddisponibilidade = self.user_data['records'][0]['inddisponibilidade']
-                clock = datetime.time(datetime.strptime(
-                    self.user_data['records'][0]['horinijornada'], '%H%M'
-                ))
-                operator.horinijornada = clock
-                clock = datetime.time(datetime.strptime(
-                    self.user_data['records'][0]['horfimjornada'], '%H%M'
-                ))
-                operator.horfimjornada = clock
-
-                user = User()
-                user.username = apps.USER_NAME
-                user.password = apps.USER_NAME
-                # user.profile.first_name = form.cleaned_data.get('first_name')
-                # user.profile.last_name = form.cleaned_data.get('last_name')
-                # user.profile.email = form.cleaned_data.get('email')
-                # user can't login until get a new Activity
-                user.is_active = True
-                user.save()
-                user.refresh_from_db()
-                operator.save()
-                # Validade user data
-                time = datetime.now().time()
-                # TODO: Retirar até 2a. ordem
-                # if operator.horinijornada < time or operator.horfimjornada > time:
-                #     message = 'Usuário não está no horário de serviço!'
-                #     message += f'(início: {operator.horinijornada} - fim: {operator.horfimjornada})'
-                #     return redirect('login:login', message=message)
-                if operator.inddisponibilidade == 'N':
-                    message = 'Usuário não está disponível no momentp!'
-                    message += f'(flag disponivel: {operator.inddisponibilidade})'
-                    return redirect('login:login', message=message)
-
+                operator = self.save_user_operators(form)
+                message = self.check_operator_rules(operator)
+                if message:
+                    return redirect('login:login')
                 # Save user permissions
-                for data in self.user_data:
+                regs = self.user_data['records']
+                for data in regs:
                     perms = UsersOperatorsPermissions()
-                    perms.pk_user_permissions = f'{operator.user_integration}-{self.user_data[data]["codlinhasepar"]}'
-                    perms.codlinhasepar = self.user_data[data]['codlinhasepar']
-                    perms.desclinhasepar = self.user_data[data]['desclinhasepar']
-                    perms.indseparacao = self.user_data[data]['indseparacao']
-                    perms.ls_status = self.user_data[data]['ls_status']
+                    perms.pk_user_permissions = f'{operator.user_integration}-{data["codlinhasepar"]}'
+                    perms.codlinhasepar = data['codlinhasepar']
+                    perms.desclinhasepar = data['desclinhasepar']
+                    perms.indseparacao = data['indseparacao']
+                    perms.ls_status = data['ls_status']
                     perms.save()
                     apps.USER_PERMISSIONS.append(perms.codlinhasepar)
 

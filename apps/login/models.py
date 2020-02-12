@@ -42,7 +42,7 @@ class UsersOperators(models.Model):
     horinijornada = models.TimeField(verbose_name='Hora início')
     horfimjornada = models.TimeField(verbose_name='Hora Fim')
     fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro Alocado')
-    insert_date = models.DateTimeField(verbose_name='Data e Hora da Inserção')
+    insert_date = models.DateTimeField(auto_now_add=True, verbose_name='Data e Hora da Inserção')
 
     class Meta:
         db_table = 'user_operators'

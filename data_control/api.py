@@ -3,6 +3,7 @@ import socket
 # import platform    # For getting the operating system name
 # import subprocess  # For executing a shell command
 from taf_car.settings import API_URLS
+from apps import RESULT_DICT
 import requests
 import json
 
@@ -14,13 +15,7 @@ class ApiHostAccess:
     proto = 'http'
     port = 5180
     url = f'{proto}://%s:{port}%s'
-    result = {
-        'status': {
-            'sttCode': 200,
-            'sttMsgs': '',
-        },
-        'data': []
-    }
+    result = RESULT_DICT
 
     def __init__(self, end_points: dict):
         self.END_POINTS = {}
@@ -38,6 +33,7 @@ class ApiHostAccess:
         # param = '-n' if platform.system().lower() == 'windows' else '-c'
         for host in API_URLS:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
             code = sock.connect_ex((API_URLS[host], 5180))
             if code == 0:
                 self.host = API_URLS[host]

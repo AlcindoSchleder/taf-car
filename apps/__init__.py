@@ -15,6 +15,15 @@ USER_NAME = None
 USER_DATA = None
 USER_PERMISSIONS = []
 
+RESULT_DICT = {
+    'status': {
+        'sttCode': 200,
+        'sttMsgs': '',
+    },
+    'data': [],
+    'result_to': ''
+}
+
 
 def prepare_boxes():
     level = CAR_LEVELS

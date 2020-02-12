@@ -25,7 +25,7 @@ class CarriersPageView(TemplateView):
     def get(self, request, *args, **kwargs):
         # Load cargo products to pandas.
         response = False
-        if len(kwargs) <= 0:
+        if not apps.CAR_PREPARED:
             if request.GET.get('prepared') and request.GET.get('prepared').lower() in ['true', '1']:
                 apps.CAR_PREPARED = True
             else:
@@ -43,6 +43,7 @@ class CarriersPageView(TemplateView):
             "response": response,
             "carid": apps.CAR_ID,
             "prepared": apps.CAR_PREPARED,
+            "loaded": apps.CAR_LOADED,
             "boxes": apps.CAR_BOXES,
         }
         # TODO: filter DataFrame data from all user permissions

@@ -25,7 +25,7 @@
                             <div class="box-qtd box-qtd{{level_key}}{{box_key}}">0</div>
                             <div class="box-id box-id{{level_key}}{{box_key}}">
                                 {% if not prepared %}
-                                <input type="text" maxlength="20" name="e{{level_key}}{{box_key}}" id="e{{level_key}}{{box_key}}" value="{{box_value}}" />
+                                <input type="text" maxlength="20" name="e{{level_key}}{{box_key}}" id="e{{level_key}}{{box_key}}" value="{{box_value.0}}" />
                                 {% else %}
                                 Box {{level_key}}.{{box_key}}: {{box_value}}
                                 {% endif %}

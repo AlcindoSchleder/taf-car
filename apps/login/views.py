@@ -17,8 +17,8 @@ class UserFormView(View):
         form = self.form_class(None)
 
         if request.user.is_authenticated:
-            apps.CAR_LOADED = False
-            return redirect('carriers:carriers', carid=apps.CAR_ID, loaded=apps.CAR_LOADED)
+            apps.CAR_COLLECT_PRODUCTS = True
+            return redirect('carriers:carriers')
         return render(request, self.template_name, {'form': form, 'cardid': apps.CAR_ID})
 
     def post(self, request):
@@ -29,14 +29,17 @@ class UserFormView(View):
             password = form.cleaned_data['password']
             user = form.authenticate_user(username=username, password=password)
             try:
+                apps.USER_NAME = username
+                apps.USER_DATA = form.result
                 if user is not None:
                     login(request, user)
+                    apps.CAR_COLLECT_PRODUCTS = True
                     return redirect('carriers:carriers')
                 elif form.flag_ins:
-                    apps.USER_NAME = username
-                    apps.USER_DATA = form.result
                     return redirect('login:signup')
                 else:
+                    apps.USER_NAME = None
+                    apps.USER_DATA = None
                     message = 'Error: Usuário não encontrado ou não possui atividades até agora!'
             except Exception as e:
                 code = form.result['status']['sttCode']

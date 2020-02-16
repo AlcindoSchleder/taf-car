@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import platform    # For getting the operating system name
-import subprocess  # For executing a shell command
+import socket
+import time
 import pandas as pd
 from taf_car.settings import API_URLS
+from apps import RESULT_DICT
 import requests
 import json
 
@@ -10,21 +11,17 @@ import json
 class ProductDataControl:
 
     END_POINTS = {
-        'product': '/tafAPI/product/1.0',
-        'product-image': '/tafAPI/product/1.0/code'
+        'all_products': '/tafApi/product/1.0/',
+        'product': '/tafApi/product/1.0/%d',
+        'product-image': '/tafAPI/product/1.0/pk/%s'
     }
     df = None
     host = None
-    proto = 'http'
-    port = 5180
-    url = f'{proto}://%s:{port}'
-    result = {
-        'status': {
-            'sttCode': 200,
-            'sttMsgs': '',
-        },
-        'data': []
-    }
+    _PROTO = 'http'
+    _PORT = 5180
+    url = f'{_PROTO}://%s:{_PORT}%s'
+    result = RESULT_DICT
+    _TIMEOUT = 1
 
     def _check_hosts(self):
         """
@@ -33,12 +30,19 @@ class ProductDataControl:
         """
         self.df = None
         # Option for the number of packets as a function of
-        param = '-n' if platform.system().lower() == 'windows' else '-c'
-        for host in API_URLS:
-            # Building the command. Ex: "ping -c 1 host"
-            command = ['ping', param, '1', API_URLS[host]]
-            if subprocess.call(command) == 0:
-                return API_URLS[host]
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(self._TIMEOUT)
+        idx = 0
+        while idx < len(API_URLS):
+            try:
+                s.connect((API_URLS[idx], int(self._PORT)))
+                s.shutdown(socket.SHUT_RDWR)
+                return API_URLS[idx]
+            except:
+                continue
+            finally:
+                idx += 1
+                s.close()
         return None
 
     def _get_all_products(self):
@@ -47,7 +51,8 @@ class ProductDataControl:
             self.result['status']['sttCode'] = 404
             self.result['status']['sttMsgs'] = 'Error: Host(s) not found!'
             return self.result
-        self.url = self.url.format(self.host)
+        self.url = self.url %(self.host, self.END_POINTS['all_products'])
+        self.result['url'] = self.url
         headers = {'Content-Type': 'application/json'}
         self.result['status']['sttCode'] = 200
         self.result['status']['sttMsgs'] = ''
@@ -57,13 +62,13 @@ class ProductDataControl:
             self.result['data'] = json.loads(response.content.decode('utf-8'))
         except Exception as e:
             self.result['status']['sttCode'] = 500
-            self.result['status']['sttMsgs'] = e.__str__()
+            self.result['status']['sttMsgs'] = f'Error on read ERP products: [{e}]'
         return self.result
 
     def get_products_data_frame(self) -> dict:
         self._get_all_products()
         if self.result['status']['sttCode'] == 200 and self.result['data'] is not None:
-            self.df = pd.DataFrame(self.result['data'])
+            self.df = pd.DataFrame(self.result['data']['records'])
         self.result['data'] = []
         return self.result
 

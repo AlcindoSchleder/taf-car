@@ -45,6 +45,11 @@ class CarriersPageView(TemplateView):
             self.pdc = ProductDataControl()
             response = self.pdc.get_products_data_frame()
             if response['status']['sttCode'] == 200:
+
+
+
+
+
                 self.df = self.pdc.data_frame.copy()
                 response = self.save_charge_products()
                 if response['status']['sttCode'] != 200:
@@ -80,10 +85,7 @@ class CarriersPageView(TemplateView):
             #       group DataFrame by rua, predio, local,
             #       order DataFrame by columns left (odd) and right (even)
         except Exception as e:
-            if self.df:
-                return render(request, f'<h1>{e}</h1><br />' + self.df.to_html())
-            else:
-                return render(request, self.template_name, {'msg_validate': e})
+            return render(request, self.template_name, {'msg_validate': e})
         return render(request, self.template_name, param)
 
     def _validate_boxes(self, data: dict) -> dict:

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import socket
-import time
 import pandas as pd
 from taf_car.settings import API_URLS
-from apps import RESULT_DICT
+from apps import RESULT_DICT, USER_NAME, USER_PERMISSIONS
+from contrib.check import CheckHost
+from apps.login.models import UsersOperatorsPermissions
 import requests
 import json
 
@@ -15,38 +15,35 @@ class ProductDataControl:
         'product': '/tafApi/product/1.0/%d',
         'product-image': '/tafAPI/product/1.0/pk/%s'
     }
+    FILTER_PROD = [
+        'seqproduto', 'desccompleta', 'qtdatual', 'qtdembcarga', 'qtdembsolcarga',
+        'qtdembsepcarga', 'nropedvenda', 'embalagem', 'pesobruto', 'pesoliquido',
+        'altura', 'largura', 'profundidade', 'codrua', 'nropredio', 'nroapartamento',
+        'especieendereco', 'indterreoaereo', 'statusendereco', 'tipespecie',
+        'nrocarga', 'tiplote', 'nrosala',
+    ]
+
+    GROUP_BY_FIELDS = [
+        'nrocarga',
+        'tiplote',
+        'codrua',
+        'nropredio',
+        'nroapartamento',
+        'nrosala',
+        'seqproduto'
+    ]
+
     df = None
     host = None
     _PROTO = 'http'
     _PORT = 5180
     url = f'{_PROTO}://%s:{_PORT}%s'
     result = RESULT_DICT
-    _TIMEOUT = 1
-
-    def _check_hosts(self):
-        """
-        Returns True if host (str) responds to a ping request.
-        Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
-        """
-        self.df = None
-        # Option for the number of packets as a function of
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(self._TIMEOUT)
-        idx = 0
-        while idx < len(API_URLS):
-            try:
-                s.connect((API_URLS[idx], int(self._PORT)))
-                s.shutdown(socket.SHUT_RDWR)
-                return API_URLS[idx]
-            except:
-                continue
-            finally:
-                idx += 1
-                s.close()
-        return None
+    _TIMEOUT = 3.5
 
     def _get_all_products(self):
-        self.host = self._check_hosts()
+        check = CheckHost(API_URLS)
+        self.host = check.check_hosts()
         if not self.host:
             self.result['status']['sttCode'] = 404
             self.result['status']['sttMsgs'] = 'Error: Host(s) not found!'
@@ -69,9 +66,17 @@ class ProductDataControl:
         self._get_all_products()
         if self.result['status']['sttCode'] == 200 and self.result['data'] is not None:
             self.df = pd.DataFrame(self.result['data']['records'])
-        self.result['data'] = []
+        # self.result['data'] = []
         return self.result
+
+    def filter_user_product(self):
+        df = self.df[self.df['tipseparacao'].isin(USER_PERMISSIONS)].copy()
+        prod = df[self.FILTER_PROD].copy()
+        prod['peso'] = prod['qtdembsolcarga'] * prod['pesobruto']
+        prod['volume_m3'] = prod['qtdembcarga'] * (prod['altura'] * prod['largura'] * prod['profundidade']) / 1000000
+        return prod.groupby(by=self.GROUP_BY_FIELDS)
 
     @property
     def data_frame(self):
-        return self.df
+        group = self.filter_user_product()
+        return group.sum() if group is not None else None

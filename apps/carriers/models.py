@@ -98,6 +98,38 @@ class CarriersProducts(models.Model):
         db_table = 'cargo_products'
 
 
+class LastProductCharge(models.Model):
+    pk_product_last_charge = models.SmallIntegerField(primary_key=True, verbose_name='código', default=1)
+    last_charge = models.DateTimeField(auto_now=True, verbose_name='Última Carga')
+
+    class Meta:
+        db_table = 'product_last_charge'
+
+
+class UserProducts(models.Model):
+    pk_user_products = models.CharField(max_length=64, primary_key=True, verbose_name='Usuario/Carga')
+    charge = models.IntegerField(verbose_name='Num. Carga')
+    lot = models.IntegerField(verbose_name='Num Lote')
+    street = models.CharField(max_length=3, verbose_name='Rua')
+    tower = models.CharField(max_length=5, verbose_name='Predio')
+    level = models.CharField(max_length=3, verbose_name='Nivel')
+    position = models.CharField(max_length=5, verbose_name='Posicao')
+    description = models.CharField(max_length=50, verbose_name='Descricao')
+    stock = models.FloatField(verbose_name='Estoque Atual')
+    qtd_packing = models.FloatField(verbose_name='Quant. da Embalagem')
+    qtd_order = models.FloatField(verbose_name='QUant. do Pedido')
+    qtd_selected = models.FloatField(verbose_name='Quant. Coletada')
+    pk_order = models.IntegerField(verbose_name='Num. Pedido')
+    unity = models.CharField(max_length=2, verbose_name='UN')
+    weight = models.FloatField(verbose_name='Peso')
+    volume = models.FloatField(verbose_name='Volume m3')
+    flag_ready = models.SmallIntegerField(default=0, verbose_name='carregado')
+    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data de Insercao')
+
+    class Meta:
+        db_table = 'user_products'
+
+
 class CarriersProductsCars(models.Model):
     # this field is a hash of the box id, barcode, order_number and customer order id
     pk_products_cars = models.CharField(max_length=64, primary_key=True, verbose_name='Box')

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import paho.mqtt.client as mqtt
 from apps import RESULT_DICT, CAR_ID
+import json
 
 
 class MqttManager:
@@ -11,12 +12,14 @@ class MqttManager:
     topic = ''
     is_connected = False
 
-    def __init__(self, server: str = '192.168.0.203', port=1883, topic=f'taf/car{CAR_ID}/e21'):
+    def __init__(self, server: str = '192.168.0.203', port=1883, topic='/iCity/mqtt', user=None, password=None):
+        if user is not None and password is not None:
+            self.client.username_pw_set(username=user, password=password)
+        self.topic = topic
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.server = server
         self.port = port
-        self.topic = topic
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client, userdata, flags, rc):
@@ -55,3 +58,12 @@ class MqttManager:
         # Other loop*() functions are available that give a threaded interface and a
         # manual interface.
         self.client.loop_start()
+
+    def publish(self, payload, end_topic: str):
+        payload = json.dumps(payload) if type(payload) == 'dict' else str(payload)
+        topic = self.topic if end_topic == '' else f'{self.topic}/{end_topic}'
+        self.client.publish(topic, payload)
+
+    def subscribe(self, end_topic: str):
+        topic = self.topic if end_topic == '' else end_topic
+        self.client.subscribe(topic)

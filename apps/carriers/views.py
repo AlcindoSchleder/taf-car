@@ -3,7 +3,6 @@ from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from data_control.products import ProductDataControl
 from django.contrib.auth import logout
-from .models import CarriersProducts
 from apps.home.models import Cars, CarsBoxes
 import apps
 
@@ -13,15 +12,6 @@ class CarriersPageView(TemplateView):
     df = None
     flag_validate = True
     pdc = None
-
-    def save_charge_products(self) -> bool:
-        try:
-            for index, row in self.df.iterrows():
-                data = CarriersProducts(**row)
-                data.save()
-        except Exception as e:
-            return e == ''
-        return True
 
     @staticmethod
     def _reset_car():
@@ -43,20 +33,8 @@ class CarriersPageView(TemplateView):
         msg_validate = ''
         if apps.CAR_COLLECT_PRODUCTS:
             self.pdc = ProductDataControl()
-            response = self.pdc.get_products_data_frame()
-            if response['status']['sttCode'] == 200:
-
-
-
-
-
-                self.df = self.pdc.data_frame.copy()
-                response = self.save_charge_products()
-                if response['status']['sttCode'] != 200:
-                    self._reset_car()
-                    logout(request)
-                    msg_validate = response['status']['sttMsgs'] + ' - ' + response['url']
-            else:
+            response = self.pdc.fractional_products
+            if type(response) == 'dict':
                 self._reset_car()
                 logout(request)
                 response['result_to'] = 'collect_products'
@@ -81,9 +59,8 @@ class CarriersPageView(TemplateView):
                 apps.CAR_PREPARED = False
         try:
             param = self.collect_products(request)
-            # TODO: filter DataFrame data from all user permissions
-            #       group DataFrame by rua, predio, local,
-            #       order DataFrame by columns left (odd) and right (even)
+            # TODO: 1) Order DataFrame by columns left (odd) and right (even)
+            #       2) start mqtt
         except Exception as e:
             return render(request, self.template_name, {'msg_validate': e})
         return render(request, self.template_name, param)

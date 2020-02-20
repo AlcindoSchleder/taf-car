@@ -1,0 +1,196 @@
+/*
+    Theme Name: i-CitySmartCharger
+    Theme URL: https://icity.com.br/themes/smartcharger
+    Author: Alcindo Schleder
+    Author URL: https://icity.com.br
+*/
+
+/* CSS Document - Reset all medias
+-----------------------------------*/
+html {
+    padding: 0;
+    margin: 0;
+}
+body {
+    padding: 0;
+    margin: 0;
+}
+div {
+    padding: 0;
+    margin: 0;
+}
+section {
+    padding: 0;
+    margin: 0;
+}
+.figure{
+    margin:0px;
+}
+img {
+    max-width:100%;
+}
+a, a:hover, a:active {
+    outline:0px !important
+}
+
+/* Primary Styles
+---------------------------------*/
+html {
+	font-size: 16px;
+	font-family: 'Montserrat', sans-serif;
+	font-weight: normal;
+}
+body {
+	background:url(../img/pw_maze_black_2X.png) left top repeat;
+	font-size:1rem;
+	color:#888;
+	margin:0;
+    height: 100vh;
+    width: 99vw;
+    overflow: hidden;
+}
+h1 {
+	font-size: 5rem;
+	font-weight:700;
+}
+h2 {
+	font-size:2.2rem;
+	font-weight:700;
+}
+h3 {
+	font-size:1.5rem;
+	font-weight:400;
+}
+h4 {
+	font-size:1.2rem;
+	font-weight:400;
+}
+h5 {
+	font-size:0.8rem;
+	font-weight:300;
+}
+h6 {
+	font-size:0.5rem;
+	font-weight:300;
+}
+/* Header Styles
+---------------------------------*/
+header {
+    display: block;
+    padding-top: 3vh;
+	height: auto;
+    width: 100%;
+}
+header .sub-title {
+	font-size: 1.5rem;
+	text-transform: uppercase;
+}
+.total-and-address {
+    height: 5rem;
+    vertical-align: middle;
+    line-height: 5rem;
+    text-align: center;
+}
+
+/* Content
+---------------------------------*/
+/* Main Page */
+.shadow-page {
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: rgba(0, 0, 0, .9);
+    z-index: 999;
+}
+.main-page {
+    height: 90%;
+    width: 90%;
+	text-transform: uppercase;
+    overflow: hidden;
+}
+
+/* Images Boxes */
+/* Text Boxes */
+.control-qtd {
+    height: 6rem;
+    vertical-align: middle;
+    line-height: 6rem;
+    text-align: center;
+}
+.control-qtd .label-qtd {
+    font-size: 2rem;
+}
+.control-qtd .field-qtd {
+    font-size: 6rem;
+    font-weight: bolder;
+}
+.carrier-title {
+    background-color: #d4f2fa;
+    color: #00f;
+    font-weight: bolder;
+    padding: 5px;
+}
+.carrier-blocks {
+}
+.carrier-blocks img {
+    margin-top: 15vh;
+}
+.carrier-box {
+    padding: 1%;
+    height: 85%;
+    width: 95%;
+    border-radius: 5px;
+}
+.boxes {
+    padding: 10px;
+    background-color: #ccc;
+    margin: 0 5px 10px 0;
+    border-radius: 5px;
+    height: 250px;
+    width: 19%;
+}
+.boxes .box-pos {
+    margin: 0;
+    padding: 0;
+    color: #000;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+.boxes .box-qtd {
+    padding: 0;
+    color: #f00;
+    font-size: 4rem;
+    font-weight: bold;
+}
+.boxes .box-id {
+    margin: 0;
+    color: #00f;
+    font-size: 1.2rem;
+}
+/* Footer
+---------------------------------*/
+footer {
+    display: block;
+    height: auto;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+}
+footer .copyright {
+    display: block;
+    padding-top: 1.5rem;
+    margin: 0;
+	color : #ccc;
+	font-size: 0.8rem;
+	display: block;
+}
+footer .copyright .credits a{
+	color: #7cc576;
+	font-weight: 600;
+	text-decoration: none;
+	transition: all 0.3s ease-in-out;
+	-moz-transition: all 0.3s ease-in-out;
+	-webkit-transition: all 0.3s ease-in-out;
+}
+footer .copyright .credits a:hover {
+	color: #fff;
+}

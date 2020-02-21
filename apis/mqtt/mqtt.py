@@ -49,7 +49,7 @@ class MqttManager:
     def disconnect(self):
         if self.client.is_connected():
             self.is_connected = False
-            self.client.loop_stop()
+            self.client_loop()
             self.client.disconnect()
 
     def client_loop(self):
@@ -57,7 +57,10 @@ class MqttManager:
         # handles reconnecting.
         # Other loop*() functions are available that give a threaded interface and a
         # manual interface.
-        self.client.loop_start()
+        if self.is_connected:
+            self.client.loop_start()
+        else:
+            self.client.loop_stop()
 
     def publish(self, payload, end_topic: str):
         payload = json.dumps(payload) if type(payload) == 'dict' else str(payload)
@@ -65,5 +68,6 @@ class MqttManager:
         self.client.publish(topic, payload)
 
     def subscribe(self, end_topic: str):
-        topic = self.topic if end_topic == '' else end_topic
+        topic = self.topic if end_topic == '' else f'{self.topic}/{end_topic}'
         self.client.subscribe(topic)
+        self.client_loop()

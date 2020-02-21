@@ -39,3 +39,16 @@ class CarsBoxes(models.Model):
 
     def __str__(self):
         return self.fk_cars.dsc_car + ' - box:' + self.box_name
+
+
+class CarBoxesMessages(models.Model):
+    pk_car_boxes_message = models.AutoField(primaryKey=True, verbose_name='ID')
+    fk_car_boxes = models.ForeignKey(CarBoxes, on_delete=models.CASCADE, verbose_name='Box')
+    flag_captured = models.SmallIntegerField(default=0, verbose_name='Capturado')
+    box_type_command = models.CharField(max_lenght=30, verbose_name='Tipo de Comando')
+    box_name = models.CharField(max_length=3, verbose_name='Nomeclatura')
+    fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
+    box_message = models.TextField(verbose_name='Mensagem')
+    capture_date = models.DateTimeField(null=True, blank=True, verbose_name='Data de Captura')
+    update_date = models.DateTimeField(null=True, blank=True, verbose_name='Data de Edicao')
+    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data Insercao')

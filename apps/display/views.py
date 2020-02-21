@@ -51,16 +51,16 @@ class DisplayPageView(TemplateView):
         # self._config_broker(
         #     int(request.GET.get('car_id')), request.GET.get('display_id')
         # )
-        apps.CAR_ID = int(request.GET.get('car_id'))
-        self.display = request.GET.get('display_id')
-        show_display = ''
-        if 'show_display' in request.GET.keys():
-            show_display = request.GET.get('show_display')
-        s = str(apps.CAR_ID).rjust(4, '0')
-        s = f'car{s}:{self.display}'
+        # apps.CAR_ID = int(request.GET.get('car_id'))
+        # self.display = request.GET.get('display_id')
+        # show_display = ''
+        # if 'show_display' in request.GET.keys():
+        #     show_display = request.GET.get('show_display')
+        # s = str(apps.CAR_ID).rjust(4, '0')
+        # s = f'car{s}:{self.display}'
         params = {
-            'cad_id': apps.CAR_ID,
-            'display_id': s,
-            'show_display': show_display
+            'cad_id': 1,            # apps.CAR_ID,
+            'display_id': '/e21',    # s,
+            'show_display': 'd-none'      # show_display
         }
         return render(request, self.template_name, params)

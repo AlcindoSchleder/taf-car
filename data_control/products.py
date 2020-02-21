@@ -21,7 +21,7 @@ class ProductDataControl:
     }
     FILTER_PROD = [
         'seqproduto', 'desccompleta', 'qtdatual', 'qtdembcarga', 'qtdembsolcarga',
-        'qtdembsepcarga', 'nropedvenda', 'embalagem', 'pesobruto', 'pesoliquido',
+        'qtdembsepcarga', 'seqpessoa', 'embalagem', 'pesobruto', 'pesoliquido',
         'altura', 'largura', 'profundidade', 'codrua', 'nropredio', 'nroapartamento',
         'especieendereco', 'indterreoaereo', 'statusendereco', 'tipespecie',
         'nrocarga', 'tiplote', 'nrosala',
@@ -34,7 +34,7 @@ class ProductDataControl:
         'nropredio',
         'nroapartamento',
         'nrosala',
-        'seqproduto'
+        'seqpessoa'
     ]
 
     _PROTO = 'http'
@@ -107,13 +107,13 @@ class ProductDataControl:
                 'tower': index[3],
                 'level': index[4],
                 'position': index[5],
-                'pk_product': index[6],
+                'pk_product': row['seqproduto'],
                 'description': row['desccompleta'],
                 'stock': row['qtdatual'],
                 'qtd_packing': row['qtdembcarga'],
                 'qtd_order': row['qtdembsolcarga'],
                 'qtd_selected': 0.0,
-                'pk_order': row['nropedvenda'],
+                'pk_customer': index[6],
                 'unity': row['embalagem'],
                 'weight': row['peso'],
                 'volume': row['volume_m3']
@@ -126,6 +126,7 @@ class ProductDataControl:
             # Assumes the default UTF-8
             hash_object = hashlib.sha256(pk.encode())
             data['pk_user_products'] = hash_object.hexdigest()
+            data['side'] = 'E' if (int(data['tower']) % 2) == 0 else 'D'
             obj_data = UserProducts(**data)
             obj_data.save()
 

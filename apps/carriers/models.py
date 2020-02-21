@@ -107,6 +107,10 @@ class LastProductCharge(models.Model):
 
 
 class UserProducts(models.Model):
+    SIDE_OPTIONS = [
+        ('E', 'Esquerda'),
+        ('D', 'Direita'),
+    ]
     pk_user_products = models.CharField(max_length=64, primary_key=True, verbose_name='Usuario/Carga')
     charge = models.IntegerField(verbose_name='Num. Carga')
     lot = models.IntegerField(verbose_name='Num Lote')
@@ -119,10 +123,16 @@ class UserProducts(models.Model):
     qtd_packing = models.FloatField(verbose_name='Quant. da Embalagem')
     qtd_order = models.FloatField(verbose_name='QUant. do Pedido')
     qtd_selected = models.FloatField(verbose_name='Quant. Coletada')
-    pk_order = models.IntegerField(verbose_name='Num. Pedido')
+    pk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
     unity = models.CharField(max_length=2, verbose_name='UN')
     weight = models.FloatField(verbose_name='Peso')
     volume = models.FloatField(verbose_name='Volume m3')
+    side = models.CharField(
+        max_length=1,
+        choices=SIDE_OPTIONS,
+        default='E',
+        verbose_name='Lado'
+    )
     flag_ready = models.SmallIntegerField(default=0, verbose_name='carregado')
     insert_date = models.DateTimeField(auto_now=True, verbose_name='Data de Insercao')
 

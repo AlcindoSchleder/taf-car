@@ -53,7 +53,7 @@ var IndexEvents = function () {
         $.ajax({
             type: "GET",
             url: 'http://192.168.0.203/api/mqtt/send_message/' + message + '/' + display,
-            dataType: 'text'
+            dataType: 'text',
             success: function(d) {
                 d = JSON.parse(d);
                 console.log(d)

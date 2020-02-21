@@ -57,19 +57,20 @@ class DisplayPageView(TemplateView):
             self.MQTT_PASSWORD
         )
         self.service.on_message = self._on_mqtt_message
+        self.service.connect()
         self.service.subscribe(self.display)
 
     def get(self, request, *args, **kwargs):
-        self._config_broker(
-            int(request.GET.get('car_id')), request.GET.get('display_id')
-        )
-        apps.CAR_ID = int(request.GET.get('car_id'))
+        car_id = int(request.GET.get('car_id'))
         self.display = request.GET.get('display_id')
+
+        self._config_broker(car_id, self.display)
+
         show_display = ''
         if 'show_display' in request.GET.keys():
             show_display = request.GET.get('show_display')
         params = {
-            'cad_id': apps.CAR_ID,
+            'car_id': car_id,
             'display_id': self.display,
             'show_display': show_display
         }

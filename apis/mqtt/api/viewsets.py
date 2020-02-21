@@ -109,13 +109,15 @@ class MqttViewSet(viewsets.ViewSet):
         """
         check Changes to display boxes stored on databses
         """
-        car_id = request.query_params.get('car_id'),
-        display_id = request.query_params.get('display_id'),
+        car_id = request.query_params.get('car_id')
+        display_id = request.query_params.get('display_id')
+        fk_display = display_id.replace('e', '')
         date_hour = datetime.now() - timedelta(hours=0, minutes=1, seconds=0)
         msgs = CarBoxesMessage.objects.filter(
             fk_cars=car_id,
-            fk_car_boxes=display_id,
+            fk_car_boxes=int(fk_display),
             capture_date__gt=date_hour,
             flag_captured=0
         ).all()
-        return Response(dict(msgs), 200)
+
+        return Response(msgs, 200)

@@ -18,7 +18,6 @@ class Cars(models.Model):
 
 
 class CarsBoxes(models.Model):
-    pk_carboxes = models.IntegerField(primary_key=True, verbose_name='ID')
     box_name = models.CharField(max_length=30, verbose_name='Código do Box')
     fk_cars = models.ForeignKey(Cars, on_delete=models.CASCADE, verbose_name='Carro')
     fisical_box_id = models.CharField(max_length=20, verbose_name='Código da Caçamba')
@@ -41,14 +40,22 @@ class CarsBoxes(models.Model):
         return self.fk_cars.dsc_car + ' - box:' + self.box_name
 
 
-class CarBoxesMessages(models.Model):
-    pk_car_boxes_message = models.AutoField(primaryKey=True, verbose_name='ID')
-    fk_car_boxes = models.ForeignKey(CarBoxes, on_delete=models.CASCADE, verbose_name='Box')
+class CarBoxesMessage(models.Model):
+    pk_car_boxes_message = models.AutoField(primary_key=True, verbose_name='Código do Carro')
+    fk_car_boxes = models.ForeignKey(CarsBoxes, on_delete=models.CASCADE, verbose_name='Box')
     flag_captured = models.SmallIntegerField(default=0, verbose_name='Capturado')
-    box_type_command = models.CharField(max_lenght=30, verbose_name='Tipo de Comando')
+    box_type_command = models.CharField(max_length=30, verbose_name='Tipo de Comando')
     box_name = models.CharField(max_length=3, verbose_name='Nomeclatura')
     fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
     box_message = models.TextField(verbose_name='Mensagem')
     capture_date = models.DateTimeField(null=True, blank=True, verbose_name='Data de Captura')
     update_date = models.DateTimeField(null=True, blank=True, verbose_name='Data de Edicao')
     insert_date = models.DateTimeField(auto_now=True, verbose_name='Data Insercao')
+
+    class Meta:
+        db_table = 'cars_boxes_message'
+        verbose_name_plural = 'CarsBoxesMessages'
+
+    def __str__(self):
+        return self.box_name
+

@@ -34,28 +34,36 @@ var IndexEvents = function () {
                 return false;
         });
         $('#form_boxes input').focusin(function (e) {
-            display = $(this).attr('name');
-            manageDisplay(display, 'display_enable');
-            console.log('enviando mensagem: ','display_enable');
+            let display = $(this).attr('name');
+            let carid = $('.carid').html()
+            manageDisplay(carid, display, 'display_enable');
         });
         $('#form_boxes input').focusout(function (e) {
-            display = $(this).attr('name');
-            value = $(this).val();
-            console.log('enviando mensagem: ', 'setbox:', display);
-            manageDisplay(display, 'setbox');
-            console.log('enviando mensagem: ', 'display_disable');
-            manageDisplay(display, 'display_disable');
+            let display = $(this).attr('name');
+            let value = $(this).val();
+            let carid = $('.carid').html()
+            manageDisplay(carid, display, 'setbox');
+            manageDisplay(carid, display, 'display_disable');
         });
-        $('#e21').select();
         $('#e21').focus();
+        $('#e21').select();
     };
-    var manageDisplay = function (display, message) {
+    var manageDisplay = function (carid, display, message) {
+//        let url = 'http://192.168.0.203/api/mqtt/send_message/'
+        let url = 'http://localhost:8000/api/mqtt/send_message/';
+        let command = {
+            'type': 'control',
+            'carid': carid,
+            'display': display,
+            'message': message
+        };
         $.ajax({
             type: "GET",
-            url: 'http://192.168.0.203/api/mqtt/send_message/' + message + '/' + display,
-            dataType: 'text',
+            url: url,
+            data: command,
+            dataType: 'json',
             success: function(d) {
-                d = JSON.parse(d);
+//                d = JSON.parse(d);
                 console.log(d)
             },
             error: function(jqXHR, textStatus, errorThrown) {

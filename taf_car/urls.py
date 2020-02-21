@@ -17,7 +17,7 @@ urlpatterns = [
     path('carriers/', include('apps.carriers.urls', 'carriers')),
     path('display/', include('apps.display.urls', 'display')),
     path(
-        'api/mqtt/send_message/<str:payload>/<str:end_topic>',
+        'api/mqtt/send_message/',
         MqttViewSet.as_view(actions={"get": "send_message"}),
         name='api_send_message'
     ),

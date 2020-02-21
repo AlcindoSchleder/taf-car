@@ -60,7 +60,7 @@ class CarriersPageView(TemplateView):
         try:
             param = self.collect_products(request)
             # TODO: 1) Order DataFrame by columns left (odd) and right (even)
-            #       2) start mqtt
+            #       2) start mqtt to displays boxes
         except Exception as e:
             return render(request, self.template_name, {'msg_validate': e})
         return render(request, self.template_name, param)

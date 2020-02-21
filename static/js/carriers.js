@@ -60,8 +60,7 @@ var IndexEvents = function () {
             error: function(jqXHR, textStatus, errorThrown) {
                 let msg = 'Um erro ocorreu ao chamar a API: status(' + textStatus + ') erro( ' + errorThrown + ')';
                 console.log('erro....', msg);
-            },
-            dataType: "json"
+            }
         });
     };
     var handleDynamicLinks = function () {

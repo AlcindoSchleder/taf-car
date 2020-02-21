@@ -21,11 +21,17 @@ class CarsBoxes(models.Model):
     pk_carsboxes = models.AutoField(primary_key=True, default=0, verbose_name='Código do Carro')
     box_name = models.CharField(max_length=30, verbose_name='Código do Box')
     fk_cars = models.ForeignKey(Cars, on_delete=models.CASCADE, verbose_name='Carro')
-    fisical_box_id = models.CharField(max_length=20, verbose_name='Código da Caçamba')
+    fisical_box_id = models.CharField(
+        blank=True, null=True, max_length=20, verbose_name='Código da Caçamba'
+    )
     level = models.SmallIntegerField(verbose_name='Nível')
     box = models.SmallIntegerField(verbose_name='Box')
-    weight = models.DecimalField(null=True, blank=True, max_digits=9, decimal_places=4, verbose_name='Peso')
-    volume = models.DecimalField(null=True, blank=True, max_digits=9, decimal_places=4, verbose_name='Volume')
+    weight = models.DecimalField(
+        null=True, blank=True, max_digits=9, decimal_places=4, verbose_name='Peso Máx.'
+    )
+    volume = models.DecimalField(
+        null=True, blank=True, max_digits=9, decimal_places=4, verbose_name='Volume Máx.'
+    )
 
     class Meta:
         db_table = 'cars_boxes'

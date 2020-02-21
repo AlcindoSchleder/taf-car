@@ -49,8 +49,8 @@ var IndexEvents = function () {
         $('#e21').select();
     };
     var manageDisplay = function (carid, display, message) {
-//        let url = 'http://192.168.0.203/api/mqtt/send_message/'
-        let url = 'http://localhost:8000/api/mqtt/send_message/';
+        let url = 'http://192.168.0.203/api/mqtt/send_message/'
+//        let url = 'http://localhost:8000/api/mqtt/send_message/';
         let command = {
             'type': 'control',
             'carid': carid,
@@ -63,7 +63,6 @@ var IndexEvents = function () {
             data: command,
             dataType: 'json',
             success: function(d) {
-//                d = JSON.parse(d);
                 console.log(d)
             },
             error: function(jqXHR, textStatus, errorThrown) {

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
 import json
+import apps
 from rest_framework import viewsets
 from rest_framework.response import Response
 from decouple import config
 from apis.mqtt.mqtt import MqttManager
-import apps
+from apps.home.models import CarBoxesMessage
 
 
 class MqttViewSet(viewsets.ViewSet):
@@ -102,3 +104,18 @@ class MqttViewSet(viewsets.ViewSet):
             'topic': f'{self.MQTT_TOPIC_BASE}/{self.mqtt_payload["display"]}'
         }
         return Response(self.result, 200)
+
+    def check_changes(self, request, *args, **kwargs):
+        """
+        check Changes to display boxes stored on databses
+        """
+        car_id = request.query_params.get('car_id'),
+        display_id = request.query_params.get('display_id'),
+        date_hour = datetime.now() - timedelta(hours=0, minutes=1, seconds=0)
+        msgs = CarBoxesMessage.objects.filter(
+            fk_cars=car_id,
+            fk_car_boxes=display_id,
+            capture_date__gt=date_hour,
+            flag_captured=0
+        ).all()
+        return Response(dict(msgs), 200)

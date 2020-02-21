@@ -21,5 +21,10 @@ urlpatterns = [
         MqttViewSet.as_view(actions={"get": "send_message"}),
         name='api_send_message'
     ),
+    path(
+        'api/mqtt/check_changes/',
+        MqttViewSet.as_view(actions={"get": "check_changes"}),
+        name='api_check_changes'
+    ),
     path('api/', include(router.urls))
 ]

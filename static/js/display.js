@@ -13,6 +13,34 @@
 var IndexEvents = function () {
 
     var documentEvents = function () {
+        let check = setInterval(function() {
+            checkChanges(check)
+        }, 5000);
+    };
+    var checkChanges = function (interval) {
+        console.log('clearing interval....')
+        clearInterval(interval)
+        let url = 'http://192.168.0.203/api/mqtt/check_changes/'
+        let car_id = $('#car_id').value()
+        let display_ud = $('#display_id').value()
+        let command = {
+            'car_id': car_id,
+            'display_id': display_id,
+        };
+        console.log('send command to api....')
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: command,
+            dataType: 'json',
+            success: function(d) {
+                console.log(d)
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                let msg = 'Um erro ocorreu ao chamar a API: status(' + textStatus + ') erro( ' + errorThrown + ')';
+                console.log('erro....', msg);
+            }
+        });
     };
     var handleDynamicLinks = function () {
     };

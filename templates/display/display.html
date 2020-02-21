@@ -3,7 +3,10 @@
 	{% load static %}
 	{%block title%}CarDisplays{%endblock%}
 	{%block content%}
-		<div class="shadow-page {{show_display}}"></div>
+		<div class="shadow-page {{show_display}}">
+			<input type="hidden" name="car_id" id="car_id" value="{{car_id}}" />
+			<input type="hidden" name="display_id" id="display_id" value="{{display_id}}" />
+		</div>
 		<section class="main-page container text-center">
 			<div class="row">
 				<div class="col-3 h-100 mt-2">

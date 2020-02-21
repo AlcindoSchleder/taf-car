@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 from rest_framework import serializers
-from taxes.models import Taxes
+# from taxes.models import Taxes
 
 
-class TaxesSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Taxes
-        fields = ['country', 'province', 'tax']
+# class TaxesSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+#         model = Taxes
+#         fields = ['country', 'province', 'tax']

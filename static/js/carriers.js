@@ -33,27 +33,21 @@ var IndexEvents = function () {
                 }
                 return false;
         });
-        $('#e21').select();
-        $('#e21').focus();
         $('#form_boxes input').focusin(function (e) {
-            console.log('Focus In... ')
             display = $(this).attr('name');
-            console.log('entou no foco do display: ', display)
-            console.log('enviando mensagem: ','display_enable')
             manageDisplay(display, 'display_enable');
-            console.log('Focus Out end... ')
+            console.log('enviando mensagem: ','display_enable');
         });
         $('#form_boxes input').focusout(function (e) {
-            console.log('Focus Out... ')
             display = $(this).attr('name');
-            console.log('saindo do foco do display: ',display)
             value = $(this).val();
-            console.log('enviando mensagem: ','setbox=' + display)
-            manageDisplay(display, 'setbox=' + value);
-            console.log('enviando mensagem: ','display_disable')
+            console.log('enviando mensagem: ', 'setbox:', display);
+            manageDisplay(display, 'setbox');
+            console.log('enviando mensagem: ', 'display_disable');
             manageDisplay(display, 'display_disable');
-            console.log('Focus Out end... ')
         });
+        $('#e21').select();
+        $('#e21').focus();
     };
     var manageDisplay = function (display, message) {
         $.ajax({

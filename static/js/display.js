@@ -21,24 +21,26 @@ var IndexEvents = function () {
         Check = executeInterval();
     };
     var checkChanges = function () {
-        console.log('clearing interval....');
+//        console.log('clearing interval....');
         clearInterval(Check);
-        let url = 'http://localhost:8000/api/mqtt/check_changes/';
+//        let url = 'http://192.168.0.203/api/mqtt/check_changes/';
+        let url = 'http://192.168.0.13:8000/api/mqtt/check_changes/';
         let car_id = $('#car_id').val();
         let display_id = $('#display_id').val();
         let command = {
             'car_id': car_id,
             'display_id': display_id
         };
-        console.log('send command to api....', command)
+//        console.log('send command to api....', command)
         $.ajax({
             type: "GET",
             url: url,
             data: command,
             dataType: 'json',
-            success: function(d) {
-                console.log('dados retornados da API', d);
-                if d.length
+            success: function(msg) {
+//                console.log('dados retornados da API', msg);
+                if ((msg.data) && (msg.data.length > 0))
+                    checkCommands(msg.data);
                 Check = executeInterval();
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -47,6 +49,20 @@ var IndexEvents = function () {
             }
         });
     };
+    var checkCommands = function(data_array) {
+        for (let i = 0; i < data_array.length; i++) {
+            if (data_array[i].box_type_command == 'control')
+                set_display_controls(data_array[i].box_message);
+            if (data_array[i].box_type_command == 'setbox')
+                $('.box_code').html(data_array[i].box_message);
+        };
+    }
+    var set_display_controls = function (message) {
+        if ((message == 'display_enable') && (!$('.shadow-page').hasClass('d-none')))
+            $('.shadow-page').addClass('d-none');
+        if ((message == 'display_disable') && ($('.shadow-page').hasClass('d-none')))
+            $('.shadow-page').removeClass('d-none');
+    }
     var handleDynamicLinks = function () {
     };
     var serializerJson = function(form) {

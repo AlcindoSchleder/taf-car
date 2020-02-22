@@ -13,11 +13,11 @@ class HomePageView(TemplateView):
         #     proto = 'http://'
         # server = proto + request.META['HTTP_HOST']
         apps.DATA_FRAME = None
-        if len(request.GET) > 0 and apps.CAR_ID < 1:
-            apps.CAR_ID = int(request.GET.get('carid')) if request.GET.get('carid') else 0
+        if len(request.GET) > 0 and int(apps.CAR_ID) < 1:
+            apps.CAR_ID = int(request.GET.get('car_id')) if request.GET.get('car_id') else 0
             if request.GET.get('prepared') and request.GET.get('prepared').lower() in ['true', '1']:
                 apps.CAR_PREPARED = True
             else:
                 apps.CAR_PREPARED = False
 
-        return render(request, self.template_name, {'carid': apps.CAR_ID, 'prepared': apps.CAR_PREPARED})
+        return render(request, self.template_name, {'car_id': apps.CAR_ID, 'prepared': apps.CAR_PREPARED})

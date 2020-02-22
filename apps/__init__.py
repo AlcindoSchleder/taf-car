@@ -22,14 +22,19 @@ USER_PERMISSIONS = ['FG', 'LF', 'FA', 'FB']
 #       FB -> Fracionado Bebidas (confinado)
 #       After get all products change all FB to CO for classificate on first products
 
-RESULT_DICT = {
-    'status': {
-        'sttCode': 200,
-        'sttMsgs': '',
-    },
-    'data': [],
-    'result_to': ''
-}
+
+def result_dict():
+    return {
+        'status': {
+            'sttCode': 200,
+            'sttMsgs': '',
+        },
+        'data': [],
+        'result_to': ''
+    }
+
+
+RESULT_DICT = result_dict()
 
 
 def prepare_boxes():

@@ -8,11 +8,11 @@
 			</div>
 			<div class="row">
 				<div class="col-4"></div>
-				{% if carid > 0 and not prepared %}
+				{% if car_id > 0 and not prepared %}
 				<a class="col-4 link btn btn-success service-link" href="{% url 'carriers:carriers' %}?prepared={{prepared}}">Alocar Caçambas no Carro</a>
 				{% endif %}
-				{% if carid > 0 and prepared %}
-				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar o Carro {{carid}}</a>
+				{% if car_id > 0 and prepared %}
+				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar o Carro {{car_id}}</a>
 				{% endif %}
 				<div class="col-4"></div>
 			</div>

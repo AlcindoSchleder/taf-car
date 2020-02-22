@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
-import json
 import apps
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.response import Response
-from decouple import config
-from apis.mqtt.mqtt import MqttManager
-from apps.home.models import CarBoxesMessage
+from apps.home.models import Cars, CarsBoxes, CarBoxesMessage
 
 
 class MqttViewSet(viewsets.ViewSet):
@@ -16,108 +14,79 @@ class MqttViewSet(viewsets.ViewSet):
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [TokenAuthentication]
 
-    MQTT_HOST = config('MQTT_HOST', default='192.168.0.20')
-    MQTT_PORT = int(config('MQTT_PORT', default=1883))
-    MQTT_CLIENT_ID = config('MQTT_CLIENT_ID', default='iCity_car_v1.0')
-    MQTT_USER = config('MQTT_USER')
-    MQTT_PASSWORD = config('MQTT_PASSWORD')
-    MQTT_TOPIC_BASE = '/taf/car'
-
-    service = None
-    mqtt_payload = ''
     result = apps.RESULT_DICT
 
-    def _config_service_manager(self, carid:int):
-        apps.CAR_ID = carid
-        if carid > 0:
-            s = str(carid).rjust(4, '0')
-            self.MQTT_TOPIC_BASE = f'/taf/car{s}'
-
-        self.service = MqttManager(
-            self.MQTT_HOST,
-            self.MQTT_PORT,
-            self.MQTT_TOPIC_BASE,
-            self.MQTT_USER,
-            self.MQTT_PASSWORD
-        )
-
-    def _config_message(self, command_type, carid, display, message) -> dict:
-        self.mqtt_payload = {
-            "type": command_type,
-            "carid": int(carid),
-            "display": display,
-            "message": message,
-        }
-        self._config_service_manager(self.mqtt_payload['carid'])
-        return self.mqtt_payload
+    def publish_message_into_db(self, command_type, car_id, display, message):
+        """
+        Save a message into database
+        """
+        self.result = apps.RESULT_DICT
+        apps.CAR_ID = car_id
+        try:
+            car = Cars.objects.get(pk=car_id)
+            carboxes = CarsBoxes.objects.get(pk=int(display.replace('e', '')))
+            display_message = CarBoxesMessage()
+            display_message.fk_car_boxes = carboxes
+            display_message.flag_captured = 0
+            display_message.box_type_command = command_type
+            display_message.box_name = display
+            display_message.fk_cars = car
+            display_message.box_message = message
+            display_message.capture_date = datetime.now(tz=timezone.utc)
+            display_message.save()
+            self.result['status']['sttMsgs'] = f'Mensagem publicada com sucesso! - ({message})'
+        except Exception as e:
+            self.result['status']['sttCode'] = 500
+            self.result['status']['sttMsgs'] = f'Erro ao gravar a mensagem no database. ({e})'
 
     def send_message(self, request, *args, **kwargs):
         """
-        Send a message to Mqtt Server
+        Send a message to display
         """
-        self._config_message(
+        self.result = apps.RESULT_DICT
+        self.publish_message_into_db(
             request.query_params.get('type'),
-            request.query_params.get('carid'),
+            request.query_params.get('car_id'),
             request.query_params.get('display'),
             request.query_params.get('message')
         )
-        try:
-            self.service.connect()
-            self.service.publish(self.mqtt_payload, self.mqtt_payload['display'])
-        except Exception as e:
-            self.result['status']['sttCode'] = 500
-            self.result['status']['sttMsgs'] = f'Error: Not send a message! - Error: {e}'
-            return Response(self.result, 500)
-        finally:
-            if self.service.is_connected:
-                self.service.disconnect()
-        self.result['status']['sttMsgs'] = 'Mensagem publicada com sucesso!'
-        self.result['publish'] = {
-            'payload': self.mqtt_payload,
-            'topic': f'{self.MQTT_TOPIC_BASE}/{self.mqtt_payload["display"]}'
-        }
-        return Response(self.result, 200)
+        return Response(self.result, self.result['status']['sttCode'])
 
-    def send_command(self, request, *args, **kwargs):
-        """
-        Send a message to Mqtt Server
-        """
-        self._config_message(
-            request.query_params.get('type'),
-            request.query_params.get('carid'),
-            request.query_params.get('display'),
-            request.query_params.get('message')
-        )
-        try:
-            self.service.connect()
-            self.service.publish(self.mqtt_payload, self.mqtt_payload['display'])
-        except Exception as e:
-            self.result['status']['sttCode'] = 500
-            self.result['status']['sttMsgs'] = f'Error: Not send a message! - Error: {e}'
-            return Response(self.result, 500)
-        finally:
-            if self.service.is_connected:
-                self.service.disconnect()
-        self.result['status']['sttMsgs'] = 'Mensagem publicada com sucesso!'
-        self.result['publish'] = {
-            'payload': self.mqtt_payload,
-            'topic': f'{self.MQTT_TOPIC_BASE}/{self.mqtt_payload["display"]}'
+    def _get_message_dictionary(self, data):
+        return {
+            'fk_car_boxes': data.fk_car_boxes.pk,
+            'flag_captured': data.flag_captured,
+            'box_type_command': data.box_type_command,
+            'box_name': data.box_name,
+            'fk_cars': data.fk_cars.pk,
+            'box_message': data.box_message,
+            'capture_date': data.capture_date,
+            'update_date': data.update_date,
+            'insert_date': data.insert_date
         }
-        return Response(self.result, 200)
 
     def check_changes(self, request, *args, **kwargs):
         """
         check Changes to display boxes stored on databses
         """
+        self.result = apps.result_dict()
         car_id = request.query_params.get('car_id')
         display_id = request.query_params.get('display_id')
         fk_display = display_id.replace('e', '')
-        date_hour = datetime.now() - timedelta(hours=0, minutes=1, seconds=0)
-        msgs = CarBoxesMessage.objects.filter(
-            fk_cars=car_id,
-            fk_car_boxes=int(fk_display),
-            capture_date__gt=date_hour,
-            flag_captured=0
-        ).all()
+        # date_hour = datetime.now(tz=timezone.utc) - timedelta(hours=0, minutes=1, seconds=0)
+        try:
+            for msg in CarBoxesMessage.objects.filter(
+                fk_cars=car_id,
+                fk_car_boxes=int(fk_display),
+                flag_captured=0
+            ):
+                self.result['data'].append(self._get_message_dictionary(msg))
 
-        return Response(msgs, 200)
+                msg.flag_captured = 1
+                msg.captured_date = datetime.now(tz=timezone.utc)
+                msg.save()
+        except Exception as e:
+            self.result['status']['sttCode'] = 500
+            self.result['status']['sttMsgs'] = f'Erro ao buscar as mensagens: {e}'
+        # HOw to return this message?
+        return Response(self.result, self.result['status']['sttCode'])

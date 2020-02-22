@@ -44,7 +44,7 @@ class CarriersPageView(TemplateView):
         return {
             "response": response,
             "msg_validate": msg_validate,
-            "carid": apps.CAR_ID,
+            "car_id": apps.CAR_ID,
             "prepared": apps.CAR_PREPARED,
             "loaded": apps.CAR_COLLECT_PRODUCTS,
             "boxes": apps.CAR_BOXES,
@@ -83,7 +83,7 @@ class CarriersPageView(TemplateView):
                 apps.CAR_BOXES[str(box_level)][str(box_box)] = value[0]
 
         return {
-            "carid": apps.CAR_ID,
+            "car_id": apps.CAR_ID,
             "prepared": apps.CAR_PREPARED,
             "boxes": apps.CAR_BOXES,
             "flag_validate": self.flag_validate,

@@ -21,7 +21,7 @@ var IndexEvents = function () {
     var documentEvents = function () {
         $('#form_boxes input').on('keypress', function (e) {
             let keycode = (e.keyCode ? e.keyCode : e.which);
-            if (keycode == '13')
+            if (keycode == '13') {
                 var inputs = $(this).parents("form").eq(0).find(":input");
                 var idx = inputs.index(this);
 
@@ -32,28 +32,29 @@ var IndexEvents = function () {
                     inputs[idx + 1].select();
                 }
                 return false;
+             }
         });
         $('#form_boxes input').focusin(function (e) {
             let display = $(this).attr('name');
-            let carid = $('.carid').html()
-            manageDisplay(carid, display, 'display_enable');
+            let car_id = $('.car_id').html()
+            manageDisplay('control', car_id, display, 'display_enable');
         });
         $('#form_boxes input').focusout(function (e) {
             let display = $(this).attr('name');
             let value = $(this).val();
-            let carid = $('.carid').html()
-            manageDisplay(carid, display, 'setbox');
-            manageDisplay(carid, display, 'display_disable');
+            let car_id = $('.car_id').html()
+            manageDisplay('setbox', car_id, display, value);
+            manageDisplay('control', car_id, display, 'display_disable');
         });
         $('#e21').focus();
         $('#e21').select();
     };
-    var manageDisplay = function (carid, display, message) {
-        let url = 'http://192.168.0.203/api/mqtt/send_message/'
-//        let url = 'http://localhost:8000/api/mqtt/send_message/';
+    var manageDisplay = function (command_type, car_id, display, message) {
+//        let url = 'http://192.168.0.203/api/mqtt/send_message/';
+        let url = 'http://192.168.0.13:8000/api/mqtt/send_message/';
         let command = {
-            'type': 'control',
-            'carid': carid,
+            'type': command_type,
+            'car_id': car_id,
             'display': display,
             'message': message
         };
@@ -96,8 +97,8 @@ var IndexEvents = function () {
         });
     };
     var serializerJson = function(form) {
-        let js = {}
-        let a = $(form).serializeArray()
+        let js = {};
+        let a = $(form).serializeArray();
         $.each(a, function() {
            if (js[this.name]) {
                if (!js[this.name].push) {

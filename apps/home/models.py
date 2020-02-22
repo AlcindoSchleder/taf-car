@@ -18,8 +18,8 @@ class Cars(models.Model):
 
 
 class CarsBoxes(models.Model):
-    pk_carsboxes = models.IntegerField(primary_key=True, default=0, verbose_name='Código do Carro')
-    box_name = models.CharField(max_length=30, verbose_name='Código do Box')
+    pk_carsboxes = models.IntegerField(primary_key=True, default=0, verbose_name='Código do Box')
+    box_name = models.CharField(max_length=30, verbose_name='Nome do Box')
     fk_cars = models.ForeignKey(Cars, on_delete=models.CASCADE, verbose_name='Carro')
     fisical_box_id = models.CharField(
         blank=True, null=True, max_length=20, verbose_name='Código da Caçamba'

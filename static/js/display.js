@@ -21,24 +21,21 @@ var IndexEvents = function () {
         Check = executeInterval();
     };
     var checkChanges = function () {
-//        console.log('clearing interval....');
         clearInterval(Check);
-//        let url = 'http://192.168.0.203/api/mqtt/check_changes/';
-        let url = 'http://192.168.0.13:8000/api/mqtt/check_changes/';
+        let url = 'http://192.168.0.203/api/mqtt/check_changes/';
+//        let url = 'http://192.168.0.13:8000/api/mqtt/check_changes/';
         let car_id = $('#car_id').val();
         let display_id = $('#display_id').val();
         let command = {
             'car_id': car_id,
             'display_id': display_id
         };
-//        console.log('send command to api....', command)
         $.ajax({
             type: "GET",
             url: url,
             data: command,
             dataType: 'json',
             success: function(msg) {
-//                console.log('dados retornados da API', msg);
                 if ((msg.data) && (msg.data.length > 0))
                     checkCommands(msg.data);
                 Check = executeInterval();

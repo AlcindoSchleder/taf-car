@@ -13,14 +13,12 @@ VOLUME_PERCENT = 30     # percentual do volume para juntar 2 pedidos na mesma ca
 
 USER_NAME = None
 USER_DATA = None
-USER_PERMISSIONS = ['FG', 'LF', 'FA', 'FB']
+USER_PERMISSIONS = ['FR', 'FL', 'CO']
 
 # TODO: fix USER_PERMISSION to constant and not load when get user login
-#       FG -> Fracionados Gerais
-#       LF -> Limpeza Fracionada
-#       FA -> Fracionado Alimentos
-#       FB -> Fracionado Bebidas (confinado)
-#       After get all products change all FB to CO for classificate on first products
+#       FR -> Fracionados Gerais
+#       FL -> Fracionados Limpeza
+#       CO -> Confinado
 
 
 def result_dict():
@@ -46,3 +44,4 @@ def prepare_boxes():
             CAR_BOXES[str(level)][str(box)] = ''
             box += 1
         level -= 1
+

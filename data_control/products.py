@@ -5,7 +5,7 @@ import datetime
 import hashlib
 import pandas as pd
 from taf_car.settings import API_URLS
-from apps import RESULT_DICT, USER_NAME
+from apps import RESULT_DICT, USER_NAME, result_dict
 from contrib.check import CheckHost
 from apps.carriers.models import CarriersProducts, LastProductCharge, UserProducts
 
@@ -24,17 +24,19 @@ class ProductDataControl:
         'qtdembsepcarga', 'seqpessoa', 'embalagem', 'pesobruto', 'pesoliquido',
         'altura', 'largura', 'profundidade', 'codrua', 'nropredio', 'nroapartamento',
         'especieendereco', 'indterreoaereo', 'statusendereco', 'tipespecie',
-        'nrocarga', 'tiplote', 'nrosala',
+        'nrocarga', 'tiplote', 'nrosala', 'seqlote', 'tipseparacao',
     ]
 
-    GROUP_BY_FIELDS = [
-        'nrocarga',
-        'tiplote',
+    ORDER_BY_SEQUENCE = [
+        'tipseparacao',
         'codrua',
         'nropredio',
         'nroapartamento',
         'nrosala',
         'seqpessoa'
+        'seqlote',
+        'nrocarga',
+        'desccompleta',
     ]
 
     _PROTO = 'http'
@@ -58,7 +60,7 @@ class ProductDataControl:
         return True
 
     def _get_products_from_api(self, api_name: str = 'all_products', **params):
-        self.result = RESULT_DICT
+        self.result = result_dict()
         check = CheckHost(API_URLS)
         self.host = check.check_hosts()
         if not self.host and api_name not in self.END_POINTS.keys():
@@ -82,15 +84,19 @@ class ProductDataControl:
             self.result['data'] = json.loads(response.content.decode('utf-8'))
         except Exception as e:
             self.result['status']['sttCode'] = 500
-            self.result['status']['sttMsgs'] = f'Error on API {api_name} to load products from ERP: [{e}]'
+            self.result['status']['sttMsgs'] = \
+                f'Error on API {api_name} ({self.url}) to load products from ERP: [{e}]'
         return self.result
 
     def _get_products_data_frame(self):
-        self._get_products_from_api('all_products')
-        if self.result['status']['sttCode'] == 200 and self.result['data'] is not None:
-            self.df = pd.DataFrame(self.result['data']['records'])
-            self._save_charge_products()
-        self.result['data'] = []
+        self.result = result_dict()
+        self.df = pd.read_csv("./temp/produtos.csv", delimiter=';', encoding='latin1')
+        self._save_charge_products()
+        # self._get_products_from_api('all_products')
+        # if self.result['status']['sttCode'] == 200 and self.result['data'] is not None:
+        #     self.df = pd.DataFrame(self.result['data']['records'])
+        #     self._save_charge_products()
+        # self.result['data'] = []
 
     def _filter_user_product(self):
         # df = self.df[self.df['tipseparacao'].isin(USER_PERMISSIONS)].copy()

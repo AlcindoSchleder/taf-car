@@ -52,7 +52,8 @@ class MqttViewSet(viewsets.ViewSet):
         )
         return Response(self.result, self.result['status']['sttCode'])
 
-    def _get_message_dictionary(self, data):
+    @staticmethod
+    def _get_message_dictionary(data):
         return {
             'fk_car_boxes': data.fk_car_boxes.pk,
             'flag_captured': data.flag_captured,
@@ -73,12 +74,13 @@ class MqttViewSet(viewsets.ViewSet):
         car_id = request.query_params.get('car_id')
         display_id = request.query_params.get('display_id')
         fk_display = display_id.replace('e', '')
-        # date_hour = datetime.now(tz=timezone.utc) - timedelta(hours=0, minutes=1, seconds=0)
+        date_hour = datetime.now(tz=timezone.utc) - timedelta(hours=0, minutes=1, seconds=0)
         try:
             for msg in CarBoxesMessage.objects.filter(
                 fk_cars=car_id,
                 fk_car_boxes=int(fk_display),
-                flag_captured=0
+                flag_captured=0,
+                captured_date=date_hour
             ):
                 self.result['data'].append(self._get_message_dictionary(msg))
 

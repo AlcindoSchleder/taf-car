@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import login
 from django.views.generic import View
 from django.shortcuts import render, redirect
-from datetime import datetime, time
+from datetime import datetime
 from .forms import User, UserLoginForm, CollectorRegisterForm
 from .models import UsersOperators, UsersOperatorsPermissions
 from apps.carriers.models import Cars
@@ -12,6 +12,7 @@ from apps.carriers.models import Cars
 class UserFormView(View):
     form_class = UserLoginForm
     template_name = 'login/login.html'
+    message = None
 
     def get(self, request):
         form = self.form_class(None)
@@ -22,7 +23,11 @@ class UserFormView(View):
         return render(request, self.template_name, {'form': form, 'cardid': apps.CAR_ID})
 
     def post(self, request):
-        message = ''
+        if self.message:
+            message = self.message
+        else:
+            message = ''
+        self.message = ''
         form = self.form_class(request.POST or None)
         if request.POST and form.is_valid():
             username = form.cleaned_data['password']
@@ -102,14 +107,14 @@ class CollectorRegisterView(View):
 
     def check_operator_rules(self, operator) -> str:
         # Check operator
-        message = ''
-        if operator.horinijornada < time or operator.horfimjornada > time:
-            message = 'Usuário não está no horário de serviço!'
-            message += f'(início: {operator.horinijornada} - fim: {operator.horfimjornada})'
+        self.message = ''
+        if operator.horinijornada < datetime.now().time() or operator.horfimjornada > datetime.now().time():
+            self.message = 'Usuário não está no horário de serviço!<br />'
+            self.message += f'(início: {operator.horinijornada} - fim: {operator.horfimjornada})'
         if operator.inddisponibilidade == 'N':
-            message = 'Usuário não está disponível no momentp!'
-            message += f'(flag disponivel: {operator.inddisponibilidade})'
-        return message
+            self.message = 'Usuário não está disponível no momentp!<br />'
+            self.message += f'(flag disponivel: {operator.inddisponibilidade})'
+        return self.message
 
     def post(self, request):
         self.user_data = apps.USER_DATA

@@ -80,12 +80,12 @@ class MqttViewSet(viewsets.ViewSet):
                 fk_cars=car_id,
                 fk_car_boxes=int(fk_display),
                 flag_captured=0,
-                captured_date=date_hour
+                capture_date=date_hour
             ):
                 self.result['data'].append(self._get_message_dictionary(msg))
 
                 msg.flag_captured = 1
-                msg.captured_date = datetime.now(tz=timezone.utc)
+                msg.capture_date = datetime.now(tz=timezone.utc)
                 msg.save()
         except Exception as e:
             self.result['status']['sttCode'] = 500

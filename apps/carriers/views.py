@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from data_control.products import ProductDataControl
 from django.contrib.auth import logout
 from apps.home.models import Cars, CarsBoxes
+from urllib.parse import urlparse
 import apps
 
 
@@ -52,12 +53,15 @@ class CarriersPageView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         # Load cargo products to pandas.
+        site_uri = urlparse(request.build_absolute_uri())
+        host = f'{site_uri.scheme}://{site_uri.netloc}'
         apps.CAR_PREPARED = request.session.get('car_prepared', False)
         try:
             apps.CAR_ID = request.session.get('car_id')
             param = self.collect_products(request)
             # TODO: 1) Order DataFrame by columns left (odd) and right (even)
             #       2) start mqtt to displays boxes
+            param['host'] = host
         except Exception as e:
             return render(request, self.template_name, {'msg_validate': e})
         return render(request, self.template_name, param)

@@ -122,6 +122,6 @@ var IndexEvents = function () {
     };
 }();
 
-$(window).on('load', function() {
+$(document).ready(function() {
     IndexEvents.init(); // starting home page events
 });

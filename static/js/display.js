@@ -22,8 +22,9 @@ var IndexEvents = function () {
     };
     var checkChanges = function () {
         clearInterval(Check);
-        let url = 'http://192.168.0.203/api/mqtt/check_changes/';
-//        let url = 'http://192.168.0.13:8000/api/mqtt/check_changes/';
+        let API_HOST = $('#api_host').val();
+//        if (host == '') host = 'http://localhost:8000';
+        let API_URL = API_HOST + '/api/mqtt/send_message/';
         let car_id = $('#car_id').val();
         let display_id = $('#display_id').val();
         let command = {
@@ -32,7 +33,7 @@ var IndexEvents = function () {
         };
         $.ajax({
             type: "GET",
-            url: url,
+            url: API_URL,
             data: command,
             dataType: 'json',
             success: function(msg) {
@@ -90,6 +91,6 @@ var IndexEvents = function () {
     };
 }();
 
-$(window).on('load', function() {
+$(document).ready(function() {
     IndexEvents.init(); // starting home page events
 });

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import TemplateView
 from django.shortcuts import render
+from urllib.parse import urlparse
 
 
 class DisplayPageView(TemplateView):
@@ -15,6 +16,8 @@ class DisplayPageView(TemplateView):
     def get(self, request, *args, **kwargs):
         display_id = request.session.get('display_id', '')
         car_id = request.session.get('car_id', 0)
+        site_uri = urlparse(request.build_absolute_uri())
+        host = f'{site_uri.scheme}://{site_uri.netloc}'
         if not self.validate_ids(request, display_id, car_id):
             raise Exception('Erro: Não posso mostrar o display sem estar vinculado ao carro e o seu nome!')
         request.session['display_id'] = display_id
@@ -26,6 +29,7 @@ class DisplayPageView(TemplateView):
         params = {
             'car_id': car_id,
             'display_id': display_id,
-            'show_display': show_display
+            'show_display': show_display,
+            'host': host
         }
         return render(request, self.template_name, params)

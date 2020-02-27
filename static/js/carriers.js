@@ -50,17 +50,19 @@ var IndexEvents = function () {
         $('#e21').select();
     };
     var manageDisplay = function (command_type, car_id, display, message) {
-        let url = 'http://192.168.0.203/api/mqtt/send_message/';
-//        let url = 'http://192.168.0.13:8000/api/mqtt/send_message/';
+        let API_HOST = $('#api_host').val();
+//        if (host == '') host = 'http://localhost:8000';
+        let API_URL = API_HOST + '/api/mqtt/send_message/';
         let command = {
             'type': command_type,
             'car_id': car_id,
             'display': display,
             'message': message
         };
+        console.log('call: ', API_URL);
         $.ajax({
             type: "GET",
-            url: url,
+            url: API_URL,
             data: command,
             dataType: 'json',
             success: function(d) {
@@ -158,6 +160,6 @@ var IndexEvents = function () {
     };
 }();
 
-$(window).on('load', function() {
+$(document).ready(function() {
     IndexEvents.init(); // starting home page events
 });

@@ -15,6 +15,7 @@ class UserFormView(View):
     message = None
 
     def get(self, request):
+        apps.CAR_ID = request.session.get('car_id')
         form = self.form_class(None)
 
         if request.user.is_authenticated:
@@ -23,6 +24,7 @@ class UserFormView(View):
         return render(request, self.template_name, {'form': form, 'cardid': apps.CAR_ID})
 
     def post(self, request):
+        apps.CAR_ID = request.session.get('car_id')
         if self.message:
             message = self.message
         else:
@@ -60,6 +62,7 @@ class CollectorRegisterView(View):
 
     def get(self, request):
         form = self.form_class(None)
+        apps.CAR_ID = request.session.get('car_id')
         self.user_data = apps.USER_DATA
 
         if request.user.is_authenticated:

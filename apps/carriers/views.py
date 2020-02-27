@@ -52,12 +52,9 @@ class CarriersPageView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         # Load cargo products to pandas.
-        if not apps.CAR_PREPARED:
-            if request.GET.get('prepared') and request.GET.get('prepared').lower() in ['true', '1']:
-                apps.CAR_PREPARED = True
-            else:
-                apps.CAR_PREPARED = False
+        apps.CAR_PREPARED = request.session.get('car_prepared', False)
         try:
+            apps.CAR_ID = request.session.get('car_id')
             param = self.collect_products(request)
             # TODO: 1) Order DataFrame by columns left (odd) and right (even)
             #       2) start mqtt to displays boxes
@@ -118,6 +115,7 @@ class CarriersPageView(TemplateView):
         data = self._validate_boxes(dict(request.POST))
         if data['flag_validate']:
             apps.CAR_PREPARED = True
+            request.session['car_prepared'] = apps.CAR_PREPARED
             if self._save_data():
                 return redirect('home:home')
             else:

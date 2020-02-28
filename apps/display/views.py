@@ -8,18 +8,21 @@ class DisplayPageView(TemplateView):
     template_name = 'display/display.html'
 
     @staticmethod
-    def validate_ids(request, display_id, car_id):
-        car_id = car_id if car_id > 0 else int(request.GET.get('car_id'))
-        display_id = display_id if display_id != '' else request.GET.get('display_id')
-        return (display_id != '') and (car_id > 0)
+    def validate_ids(request):
+        car_id = request.session.get('car_id', 0) \
+            if request.session.get('car_id', 0) > 0 \
+            else int(request.GET.get('car_id'))
+        display_id = request.session.get('display_id', '') \
+            if request.session.get('display_id', '') != '' \
+            else request.GET.get('display_id')
+        return car_id, display_id, (display_id != '') and (car_id > 0)
 
     def get(self, request, *args, **kwargs):
-        display_id = request.session.get('display_id', '')
-        car_id = request.session.get('car_id', 0)
+        car_id, display_id, flag_validate = self.validate_ids(request)
+        if not flag_validate:
+            raise Exception('Erro: Não posso mostrar o display sem estar vinculado ao carro e o seu nome!')
         site_uri = urlparse(request.build_absolute_uri())
         host = f'{site_uri.scheme}://{site_uri.netloc}'
-        if not self.validate_ids(request, display_id, car_id):
-            raise Exception('Erro: Não posso mostrar o display sem estar vinculado ao carro e o seu nome!')
         request.session['display_id'] = display_id
         request.session['car_id'] = car_id
 

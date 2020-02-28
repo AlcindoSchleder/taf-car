@@ -59,7 +59,7 @@ class CarriersPageView(TemplateView):
         flag = 'car_prepared'
         apps.CAR_PREPARED = request.GET.get(flag) if request.GET.get(flag) else False
         flag = 'car_collect_products'
-        apps.CAR_COLLECT_PRODUCTS = request.GET.get(flag) if flag in request.GET.get(flag) else False
+        apps.CAR_COLLECT_PRODUCTS = request.GET.get(flag) if request.GET.get(flag) else False
         try:
             apps.CAR_ID = request.session.get('car_id') ##### Coletando produtos
             param = self.collect_products(request)

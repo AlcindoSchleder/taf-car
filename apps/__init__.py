@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from django.urls import reverse
+from urllib.parse import urlparse, urlencode
 
 CAR_ID = 0
 CAR_PREPARED = False
@@ -45,3 +47,13 @@ def prepare_boxes():
             box += 1
         level -= 1
 
+
+def get_redirect_url(base_url, message: str = None, params: dict = None):
+    base_url = reverse(base_url)
+    if params:
+        if message:
+            params['message'] = message
+    else:
+        params = {}
+    query_string = urlencode(params)
+    return f'{base_url}?{query_string}'

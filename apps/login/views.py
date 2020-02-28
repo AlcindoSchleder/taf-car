@@ -41,6 +41,11 @@ class UserFormView(View):
                 if user is not None:
                     login(request, user)
                     apps.CAR_COLLECT_PRODUCTS = True
+                    params = {
+                        'car_id': apps.CAR_ID,
+                        'car_prepared': True,
+                        'car_collect_products': True,
+                    }
                     return redirect('carriers:carriers')
                 elif form.flag_ins:
                     return redirect('login:signup')

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
-from data_control.products import ProductDataControl
 from django.contrib.auth import logout
+from data_control.products import ProductDataControl
 from apps.home.models import Cars, CarsBoxes
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 import apps
 
 
@@ -32,6 +32,7 @@ class CarriersPageView(TemplateView):
     def collect_products(self, request) -> dict:
         response = None
         msg_validate = ''
+
         if apps.CAR_COLLECT_PRODUCTS:
             self.pdc = ProductDataControl()
             response = self.pdc.fractional_products
@@ -55,9 +56,12 @@ class CarriersPageView(TemplateView):
         # Load cargo products to pandas.
         site_uri = urlparse(request.build_absolute_uri())
         host = f'{site_uri.scheme}://{site_uri.netloc}'
-        apps.CAR_PREPARED = request.session.get('car_prepared', False)
+        flag = 'car_prepared'
+        apps.CAR_PREPARED = request.GET.get(flag) if request.GET.get(flag) else False
+        flag = 'car_collect_products'
+        apps.CAR_COLLECT_PRODUCTS = request.GET.get(flag) if flag in request.GET.get(flag) else False
         try:
-            apps.CAR_ID = request.session.get('car_id')
+            apps.CAR_ID = request.session.get('car_id') ##### Coletando produtos
             param = self.collect_products(request)
             # TODO: 1) Order DataFrame by columns left (odd) and right (even)
             #       2) start mqtt to displays boxes
@@ -70,8 +74,8 @@ class CarriersPageView(TemplateView):
         self.flag_validate = True
         self.msg_validate = ''
         for key in data:
-            value = data[key]
-            if value[0] == '' or key == 'csrfmiddlewaretoken':
+            value = data[key][0]
+            if value == '' or key == 'csrfmiddlewaretoken':
                 continue
             else:
                 box_level = key[1]
@@ -81,14 +85,16 @@ class CarriersPageView(TemplateView):
                     self.msg_validate = 'Duplicidade de caçambas detectada '
                     self.msg_validate += f'(nível: {box_level} posição: {box_box} código: {value}).'
                     break
-                apps.CAR_BOXES[str(box_level)][str(box_box)] = value[0]
+                if str(box_level) not in apps.CAR_BOXES.keys():
+                    apps.CAR_BOXES[str(box_level)] = {}
+                if str(box_box) not in apps.CAR_BOXES[str(box_level)].keys():
+                    apps.CAR_BOXES[str(box_level)][str(box_box)] = value
 
         return {
             "car_id": apps.CAR_ID,
-            "prepared": apps.CAR_PREPARED,
-            "boxes": apps.CAR_BOXES,
+            "car_prepared": self.flag_validate,
             "flag_validate": self.flag_validate,
-            "msg": self.msg_validate,
+            "message": self.msg_validate,
         }
 
     def _save_data(self):
@@ -116,15 +122,22 @@ class CarriersPageView(TemplateView):
         return True
 
     def post(self, request):
+        apps.CAR_ID = request.session.get('car_id', 0)
+        if apps.CAR_ID <= 0:
+            message = 'Erro ao Alocar as Caixas: Identificação do Carro não foi Fornecida!'
+            return redirect(apps.get_redirect_url('home:home', message=message))
+
         data = self._validate_boxes(dict(request.POST))
         if data['flag_validate']:
             apps.CAR_PREPARED = True
-            request.session['car_prepared'] = apps.CAR_PREPARED
+            # request.session['car_prepared'] = apps.CAR_PREPARED
             if self._save_data():
-                return redirect('home:home')
+                msg = 'Configuração das Caçambas realizada com sucesso!!'
+                data = {'car_id': 1, 'car_prepared': True, 'message': msg}
+                return redirect(apps.get_redirect_url('home:home', params=data))
             else:
-                data['msg_validate'] = self.msg_validate
+                data['message'] = self.msg_validate
                 return render(request, self.template_name, data)
         else:
-            data['msg_validate'] = self.msg_validate
+            data['message'] = self.msg_validate
             return render(request, self.template_name, data)

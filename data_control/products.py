@@ -33,9 +33,9 @@ class ProductDataControl:
         'nropredio',
         'nroapartamento',
         'nrosala',
+        'nrocarga',
         'seqpessoa'
         'seqlote',
-        'nrocarga',
         'desccompleta',
     ]
 
@@ -96,7 +96,7 @@ class ProductDataControl:
         # if self.result['status']['sttCode'] == 200 and self.result['data'] is not None:
         #     self.df = pd.DataFrame(self.result['data']['records'])
         #     self._save_charge_products()
-        # self.result['data'] = []
+        self.result['data'] = []
 
     def _filter_user_product(self):
         # df = self.df[self.df['tipseparacao'].isin(USER_PERMISSIONS)].copy()

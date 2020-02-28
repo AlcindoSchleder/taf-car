@@ -11,7 +11,7 @@ class DisplayPageView(TemplateView):
     def validate_ids(self, request):
         car_id = int(request.GET.get('car_id'))
         display_id = request.GET.get('display_id')
-        if (display_id != '') and (car_id > 0):
+        if (display_id == '') and (car_id < 1):
             raise Exception('Erro: Não posso mostrar o display sem estar vinculado ao carro e o seu nome!')
         if display_id not in self.VALID_DISPLAY:
             raise Exception(f'Display name must be a value between e2[1-5] and e1[1-5]')

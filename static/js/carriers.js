@@ -51,7 +51,6 @@ var IndexEvents = function () {
     };
     var manageDisplay = function (command_type, car_id, display, message) {
         let API_HOST = $('#api_host').val();
-//        if (host == '') host = 'http://localhost:8000';
         let API_URL = API_HOST + '/api/mqtt/send_message/';
         let command = {
             'type': command_type,

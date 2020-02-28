@@ -23,8 +23,7 @@ var IndexEvents = function () {
     var checkChanges = function () {
         clearInterval(Check);
         let API_HOST = $('#api_host').val();
-//        if (host == '') host = 'http://localhost:8000';
-        let API_URL = API_HOST + '/api/mqtt/send_message/';
+        let API_URL = API_HOST + '/api/mqtt/check_changes/';
         let car_id = $('#car_id').val();
         let display_id = $('#display_id').val();
         let command = {

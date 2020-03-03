@@ -38,7 +38,7 @@ class CarriersProducts(models.Model):
         ('F', 'Finalizada'),
 
     ]
-    pk_carriers_products = models.IntegerField(primary_key=True, verbose_name='Código')
+    pk_carriers_products = models.IntegerField(primary_key=True, default=0, verbose_name='Código')
     nroempresa = models.IntegerField(verbose_name='Empresa')
     nrocarga = models.IntegerField(verbose_name='Carga')
     seqlote = models.IntegerField(verbose_name='Lote')
@@ -128,7 +128,7 @@ class CarriersCars(models.Model):
     # hash contendo o usuário, o carro, a carga, o pedido, e o box
     pk_carriers_cars = models.CharField(max_length=64, primary_key=True, verbose_name='Usuario/Carga')
     fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
-    fk_cars_boxes = models.ForeignKey(CarsBoxes, verbose_name='Box')
+    fk_cars_boxes = models.ForeignKey(CarsBoxes, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Box')
     fk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
     fk_products = models.ForeignKey(CarriersProducts, on_delete=models.PROTECT, verbose_name='Produto')
     charge = models.IntegerField(verbose_name='Num. Carga')

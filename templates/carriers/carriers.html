@@ -10,7 +10,11 @@
                     <span class="text-success">Carro:&nbsp;
                         <span class="car_id">{{car_id}}</span>
                     </span>
-                    &nbsp;&nbsp;Localização das Caçambas!
+                    {% if car_prepared %}
+                        Coletando Produtos - Usuário: {{user}}
+                    {% else %}
+                        Localização das Caçambas!
+                    {% endif %}
                     <span class="text-danger">{{message}}</span>
                 </h3>
             </div>
@@ -19,7 +23,7 @@
                     <img src="{% static 'img/prod.png' %}" alt="product" />
                 </div>
                 <div class="carrier-box col-10">
-                {% if not prepared %}
+                {% if not car_prepared %}
                 <form id="form_boxes" method="POST">
                     {% csrf_token %}
                 {% endif %}
@@ -30,7 +34,7 @@
                             <div class="box-pos box-pos{{level_key}}{{box_key}}">{{level_key}}.{{box_key}}</div>
                             <div class="box-qtd box-qtd{{level_key}}{{box_key}}">0</div>
                             <div class="box-id box-id{{level_key}}{{box_key}}">
-                                {% if not prepared %}
+                                {% if not car_prepared %}
                                 <input type="text" maxlength="20" name="e{{level_key}}{{box_key}}" id="e{{level_key}}{{box_key}}" value="{{box_value.0}}" />
                                 {% else %}
                                 Box {{level_key}}.{{box_key}}: {{box_value}}

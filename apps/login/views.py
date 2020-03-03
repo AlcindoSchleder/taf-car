@@ -20,7 +20,15 @@ class UserFormView(View):
 
         if request.user.is_authenticated:
             apps.CAR_COLLECT_PRODUCTS = True
-            return redirect('carriers:carriers')
+            params = {
+                'car_id': 1,
+                'car_prepared': 1,
+                'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
+                'user': request.user.username,
+                'message': ''
+            }
+            return redirect(apps.get_redirect_url('carriers:carriers', params=params))
+
         return render(request, self.template_name, {'form': form, 'cardid': apps.CAR_ID})
 
     def post(self, request):
@@ -42,11 +50,13 @@ class UserFormView(View):
                     login(request, user)
                     apps.CAR_COLLECT_PRODUCTS = True
                     params = {
-                        'car_id': apps.CAR_ID,
-                        'car_prepared': True,
-                        'car_collect_products': True,
+                        'car_id': 1,
+                        'car_prepared': 1,
+                        'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
+                        'user': request.user.username,
+                        'message': ''
                     }
-                    return redirect('carriers:carriers')
+                    return redirect(apps.get_redirect_url('carriers:carriers', params=params))
                 elif form.flag_ins:
                     return redirect('login:signup')
                 else:

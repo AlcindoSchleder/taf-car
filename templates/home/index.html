@@ -9,7 +9,7 @@
 			<div class="row">
 				<div class="col-4"></div>
 				{% if car_id > 0 and not car_prepared %}
-				<a class="col-4 link btn btn-success service-link" href="{% url 'carriers:carriers' %}?prepared={{prepared}}">Alocar Caçambas no Carro</a>
+				<a class="col-4 link btn btn-success service-link" href="{% url 'carriers:carriers' %}?car_prepared={{car_prepared}}&car_collect_products={{car_collect_products}}">Alocar Caçambas no Carro</a>
 				{% endif %}
 				{% if car_id > 0 and car_prepared %}
 				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar o Carro {{car_id}}</a>

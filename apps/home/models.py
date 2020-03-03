@@ -18,7 +18,9 @@ class Cars(models.Model):
 
 
 class CarsBoxes(models.Model):
-    pk_carsboxes = models.IntegerField(primary_key=True, default=0, verbose_name='Código do Box')
+    # pk is composed of the car code and the code of each box = int((str(CAR_ID) + str(BOX_ID)))
+    # BOX_ID is int(str(level) + str(box))
+    pk_carsboxes = models.IntegerField(primary_key=True, default=0, verbose_name='Identificação')
     box_name = models.CharField(max_length=30, verbose_name='Nome do Box')
     fk_cars = models.ForeignKey(Cars, on_delete=models.CASCADE, verbose_name='Carro')
     fisical_box_id = models.CharField(
@@ -26,6 +28,8 @@ class CarsBoxes(models.Model):
     )
     level = models.SmallIntegerField(verbose_name='Nível')
     box = models.SmallIntegerField(verbose_name='Box')
+    # string that store line, charge and order separated by lines (1 box can hold multiple orders)
+    charge_key = models.TextField(blank=True, null=True, verbose_name='Carga Vinculada')
     weight = models.DecimalField(
         null=True, blank=True, max_digits=9, decimal_places=4, verbose_name='Peso Máx.'
     )

@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from data_control.products import ProductDataControl
 from apps.home.models import Cars, CarsBoxes
+from apps.carriers.models import CarriersCars
 from urllib.parse import urlparse, urlencode
 import apps
 
@@ -37,18 +38,21 @@ class CarriersPageView(TemplateView):
             self.pdc = ProductDataControl()
             response = self.pdc.fractional_products
             if type(response) == 'dict':
-                self._reset_car()
-                logout(request)
-                response['result_to'] = 'collect_products'
-                msg_validate = response['status']['sttMsgs'] + ' - ' + response['url']
+                if response['status']['sttCode'] != 200:
+                    self._reset_car()
+                    logout(request)
+                    response['result_to'] = 'collect_products'
+                    msg_validate = response['status']['sttMsgs'] + ' - ' + response['url']
+                else:
+                    data = pdc.product_data()
         else:
             apps.prepare_boxes()
         return {
             "response": response,
             "msg_validate": msg_validate,
             "car_id": apps.CAR_ID,
-            "prepared": apps.CAR_PREPARED,
-            "loaded": apps.CAR_COLLECT_PRODUCTS,
+            "car_prepared": int(apps.CAR_PREPARED),
+            "car_collect_products": int(apps.CAR_COLLECT_PRODUCTS),
             "boxes": apps.CAR_BOXES,
         }
 
@@ -57,14 +61,14 @@ class CarriersPageView(TemplateView):
         site_uri = urlparse(request.build_absolute_uri())
         host = f'{site_uri.scheme}://{site_uri.netloc}'
         flag = 'car_prepared'
-        apps.CAR_PREPARED = request.GET.get(flag) if request.GET.get(flag) else False
+        apps.CAR_PREPARED = bool(int(request.GET.get(flag))) if request.GET.get(flag) else False
+        # apps.CAR_PREPARED = bool(apps.CAR_PREPARED)
         flag = 'car_collect_products'
-        apps.CAR_COLLECT_PRODUCTS = request.GET.get(flag) if request.GET.get(flag) else False
+        apps.CAR_COLLECT_PRODUCTS = bool(int(request.GET.get(flag))) if request.GET.get(flag) else False
+        # apps.CAR_COLLECT_PRODUCTS = bool(apps.CAR_COLLECT_PRODUCTS)
         try:
-            apps.CAR_ID = request.session.get('car_id') ##### Coletando produtos
+            apps.CAR_ID = request.session.get('car_id')
             param = self.collect_products(request)
-            # TODO: 1) Order DataFrame by columns left (odd) and right (even)
-            #       2) start mqtt to displays boxes
             param['host'] = host
         except Exception as e:
             return render(request, self.template_name, {'msg_validate': e})
@@ -114,6 +118,7 @@ class CarriersPageView(TemplateView):
                     car_box.weight = 0
                     car_box.volume = 0
                     car_box.fk_cars = car
+                    car_box.charge_key = {}
                     car_box.save()
                 except Exception as e:
                     self.msg_validate = f'Error when save carboxes! ({e})'

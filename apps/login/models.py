@@ -53,6 +53,9 @@ class UsersOperatorsPermissions(models.Model):
         ('A', 'Ativa'),
         ('I', 'Inativa'),
     ]
+    #
+    # Primary key contains user_name and number of permission
+    #
     pk_user_permissions = models.CharField(max_length=30, primary_key=True, verbose_name='User-Permisson')
     codlinhasepar = models.CharField(max_length=2, verbose_name='Linha de Separação')
     desclinhasepar = models.CharField(max_length=50, verbose_name='Descrição')

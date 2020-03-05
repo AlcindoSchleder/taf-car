@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from data_control.products import ProductDataControl
 from apps.home.models import Cars, CarsBoxes
 from apps.carriers.models import CarriersCars
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse
 import apps
 
 

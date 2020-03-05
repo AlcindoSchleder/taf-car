@@ -125,6 +125,12 @@ class CarriersCars(models.Model):
         ('E', 'Esquerda'),
         ('D', 'Direita'),
     ]
+    STATUS_OPTIONS = [
+        ('L', 'Livre'),
+        ('P', 'Processando'),
+        ('S', 'Em Separação'),
+        ('C', 'Em Conferência'),
+    ]
     # hash contendo o usuário, o carro, a carga, o pedido, e o box
     pk_carriers_cars = models.CharField(max_length=64, primary_key=True, verbose_name='Usuario/Carga')
     fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
@@ -147,12 +153,10 @@ class CarriersCars(models.Model):
     weight_box = models.FloatField(verbose_name='Peso do Box')
     volume_box = models.FloatField(verbose_name='Volume do Box')
     side = models.CharField(
-        max_length=1,
-        choices=SIDE_OPTIONS,
-        default='E',
-        verbose_name='Lado'
+        max_length=1, choices=SIDE_OPTIONS, default='E', verbose_name='Lado'
     )
-    flag_status = models.SmallIntegerField(default=0, verbose_name='Status')
+    flag_status = models.CharField(
+        max_length=1, choices=STATUS_OPTIONS, default='L', verbose_name='Status')
     flag_ready = models.SmallIntegerField(default=0, verbose_name='Carregado')
     flag_conference = models.SmallIntegerField(default=0, verbose_name='Conferido')
     insert_date = models.DateTimeField(auto_now=True, verbose_name='Data de Insercao')

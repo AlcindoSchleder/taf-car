@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import requests
 import json
 import datetime
@@ -59,10 +60,11 @@ class ProductDataControl:
     date_last_charge = 0
 
     def _save_charge_products(self) -> bool:
+        res = result_dict()
         try:
             data = None
-            for index, row in self.df.iterrows():
-                row['pk_carriers_products'] = self.df.index[index]
+            for index, row in self.df_original.iterrows():
+                row['pk_carriers_products'] = self.df_original.index[index]
                 data = CarriersCars(**row)
                 data.save()
             reg = LastCharge(
@@ -71,61 +73,68 @@ class ProductDataControl:
             )
             reg.save()
         except Exception as e:
-            return e == ''
-        return True
+            res['status']['sttCode'] = 500
+            res['status']['sttMsgs'] = f'Erro: ao salvar o Data Frame - {e}'
+            return res
+        return res
 
     def _get_products_from_api(self, api_name: str = 'all_products', **params):
+        res = result_dict()
         try:
             last_charge = LastCharge.objects.get()
             pk_last_charge = last_charge.pk_last_charge
         except ObjectDoesNotExist:
             pk_last_charge = 0
-        self.result = result_dict()
         check = CheckHost(API_URLS)
         self.host = check.check_hosts()
         if not self.host and api_name not in self.END_POINTS.keys():
-            self.result['status']['sttCode'] = 404
-            self.result['status']['sttMsgs'] = f'Error: API Host or API name {api_name} not found!'
-            return self.result
-
-        # TODO: 1) Separate routes on all, fractional, and greatness products
-        #       2) Load API parameter on API ENDPOINT
-        params = {
-            'charge': pk_last_charge
-        }
+            res['status']['sttCode'] = 404
+            res['status']['sttMsgs'] = f'Error: API Host or API name {api_name} not found!'
+            return res
+        params = {}
+        # params = {
+        #     'charge': pk_last_charge
+        # }
         end_point = self.END_POINTS[api_name].format(**params) \
             if len(params) > 0 and self.END_POINTS[api_name].find('{p') > -1 \
             else self.END_POINTS[api_name]
 
         self.url = self.url % self.host, end_point    # mount URL
-        self.result['url'] = self.url
+        res['url'] = self.url
 
         headers = {'Content-Type': 'application/json'}
         try:
             response = requests.get(self.url, headers=headers)  # Call API with parameters on url
-            self.result['status']['sttCode'] = response.status_code
-            self.result['data'] = json.loads(response.content.decode('utf-8'))
+            res['status']['sttCode'] = response.status_code
+            res['data'] = json.loads(response.content.decode('utf-8'))
         except Exception as e:
-            self.result['status']['sttCode'] = 500
-            self.result['status']['sttMsgs'] = \
+            res['status']['sttCode'] = 404
+            res['status']['sttMsgs'] = \
                 f'Error on API {api_name} ({self.url}) to load products from ERP: [{e}]'
-        return self.result
+        return res
 
     def _get_products_data_frame(self):
-        self.result = result_dict()
-        # TODO: Read Carriers Charges saved on plataform if exists otherwise load from API
-        # carriers = CarriersCars.objects.filter(fk_cars_id=CAR_ID, flag_status='L')
-        # if carriers.count() > 0:
-        #     pd.DataFrame(list(carriers))
-        self.df = pd.read_csv("./temp/produtos.csv", delimiter=';', encoding='latin1')
-        # TODO: Read LastCharge to get the last Charge and date/hour of products loaded
-        # self._get_products_from_api('all_products')
-        # if self.result['status']['sttCode'] == 200 and self.result['data'] is not None:
-        #     self.df = pd.DataFrame(self.result['data']['records'])
+        res = result_dict()
+        carriers = CarriersCars.objects.filter(fk_cars_id=CAR_ID, flag_status='L')
+        if carriers.count() > 0:
+            pd.DataFrame(list(carriers))
+        else:
+            res = self._get_products_from_api('all_products')
+            if res['status']['sttCode'] == 200 and res['data'] is not None:
+                self.df = pd.DataFrame(res['data']['records'])
+        if not res['status']['sttCode'] == 200:
+            file_name = "./temp/produtos.csv"
+            if os.path.exists(file_name):
+                self.df = pd.read_csv(file_name, delimiter=';', encoding='latin1')
+        if self.df is None:
+            res['status']['sttCode'] = 500
+            res['status']['sttMsgs'] = 'Error: None data found to Data Frame!'
+            return res
         self.df['status'] = 'L'
         self.df_original = self.df.copy()
         self._save_charge_products()
-        self.result['data'] = []
+        res['data'] = []
+        return res
 
     def _load_boxes(self):
         first_pk = int(str(CAR_ID) + str(10))
@@ -160,12 +169,15 @@ class ProductDataControl:
         users = UsersOperatorsPermissions.objects.filter(pk__startswith=USER_NAME)
         for user in users:
             self.USER_PERMISSIONS.append(user.codlinhasepar)
+        if self.USER_PERMISSIONS.count() == 0:  # send a message that user not has activity
+            # return -1
+            self.USER_PERMISSIONS = ['FR', 'FL']
         self.df = self.df[self.df['tipseparacao'].isin(self.USER_PERMISSIONS)]
 
         self._calculate_fields()
         if not self._load_boxes():
-            return False
-        return True
+            return -2
+        return 0
 
     def _get_iterrow(self, index, row):
         pk_box = int(str(CAR_ID) + str(row['box_id']))
@@ -304,24 +316,30 @@ class ProductDataControl:
 
     @property
     def fractional_products(self):
-        self._get_products_data_frame()
+        self.result = self._get_products_data_frame()
         if self.result['status']['sttCode'] == 200:
-            if self._filter_user_product():
+            self.result = result_dict()
+            flag_filter = self._filter_user_product()
+            if flag_filter == 0:
                 self._set_boxes_charge()
                 self._save_carrier_charges()
                 self.result['status']['sttCode'] = 200
                 self.result['status']['sttMsgs'] = 'Operação realizada com sucesso'
-                return self.result
             else:
                 self.result['status']['sttCode'] = 500
-                self.result['status']['sttMsgs'] = f'Erro: Nenhuma Caçamba foi alocada para o carro: {CAR_ID}'
-        else:
-            return self.result
+                if flag_filter == -1:
+                    self.result['status']['sttMsgs'] = f'Usuário {USER_NAME} não ainda não possui atividades!'
+                elif flag_filter == -2:
+                    self.result['status']['sttMsgs'] = f'Erro: Nenhuma Caçamba foi alocada para o carro: {CAR_ID}'
+                else:
+                    self.result['status']['sttMsgs'] = 'Erro Desconhecido: Entre em contato com o suporte' + \
+                                                       f' e informe o seguinte código: {CAR_ID}-{flag_filter}'
+        return self.result
 
     @property
     def product_data(self):
         data = CarriersCars.objects.filter(
-            qtd_collected__gt=0, flag_status=0, flag_ready=0, flag_conference=1
+            qtd_collected__gt=0, flag_status='S', flag_ready=0, flag_conference=0
         ).orderby(
             'street', 'tower', 'charge', 'lot', 'pk_customer', 'level', 'position'
         )

@@ -3,7 +3,7 @@ import requests
 import json
 import apps
 from django.views.generic import TemplateView
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from urllib.parse import urlparse
 from .models import CarsBoxes
 
@@ -53,7 +53,7 @@ class HomePageView(TemplateView):
         # server = proto + request.META['HTTP_HOST']
         message = ''
         apps.DATA_FRAME = None
-        apps.CAR_ID = request.session.get('car_id', 0)
+        apps.CAR_ID = int(request.session.get('car_id', 0))
         site_uri = urlparse(request.build_absolute_uri())
         self.host = f'{site_uri.scheme}://{site_uri.netloc}'
         # host = site_uri.netloc
@@ -62,12 +62,11 @@ class HomePageView(TemplateView):
                 apps.CAR_ID = int(request.GET.get('car_id')) if request.GET.get('car_id') else 0
             apps.CAR_PREPARED = bool(request.GET.get('car_prepared')) \
                 if request.GET.get('car_prepared') else False
+            if not apps.CAR_PREPARED:
+                apps.CAR_PREPARED, message = self._check_allocation_boxes()
             apps.CAR_COLLECT_PRODUCTS = True if apps.CAR_PREPARED else False
             message = request.GET.get('message') if request.GET.get('message') else ''
             request.session['car_id'] = apps.CAR_ID
-            request.session['host'] = self.host
-            if not apps.CAR_PREPARED:
-                apps.CAR_PREPARED, message = self._check_allocation_boxes()
         params = {
             'car_id': apps.CAR_ID,
             'car_prepared': int(apps.CAR_PREPARED),
@@ -75,4 +74,8 @@ class HomePageView(TemplateView):
             'host': self.host,
             'message': message,
         }
+        if apps.CAR_PREPARED and not request.user.is_authenticated:
+            return redirect(apps.get_redirect_url('login:login', params=params))
+        if apps.CAR_PREPARED and request.user.is_authenticated:
+            return redirect(apps.get_redirect_url('carriers:carriers', params=params))
         return render(request, self.template_name, params)

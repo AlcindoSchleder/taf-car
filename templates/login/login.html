@@ -9,7 +9,7 @@
             {% if not request.user.is_authenticated %}
             <form class="form-login" id="login" method="POST">
                 {% csrf_token %}
-                <div class="msg">Digite seu código de usuário para entrar:
+                <div class="msg">Carro {{car_id}}: Digite seu código de usuário:
                 {% include 'home/form_error_msg.html' %}
                 </div>
                 {% for field in form %}

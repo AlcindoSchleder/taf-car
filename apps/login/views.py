@@ -29,7 +29,7 @@ class UserFormView(View):
             }
             return redirect(apps.get_redirect_url('carriers:carriers', params=params))
 
-        return render(request, self.template_name, {'form': form, 'cardid': apps.CAR_ID})
+        return render(request, self.template_name, {'form': form, 'car_id': apps.CAR_ID})
 
     def post(self, request):
         apps.CAR_ID = request.session.get('car_id')
@@ -82,7 +82,7 @@ class CollectorRegisterView(View):
 
         if request.user.is_authenticated:
             return redirect('carriers:carriers')
-        return render(request, self.template_name, {'form': form, 'carid': apps.CAR_ID})
+        return render(request, self.template_name, {'form': form, 'car_id': apps.CAR_ID})
 
     def save_user_operators(self, form):
         operator = form.save(commit=False)

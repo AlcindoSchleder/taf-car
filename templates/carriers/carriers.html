@@ -15,12 +15,19 @@
                     {% else %}
                         Localização das Caçambas!
                     {% endif %}
-                    <span class="text-danger">{{message}}</span>
-                </h3>
+                    {% if product %}
+                        <span class="text-danger">{{product}} - {{address}}</span>
+                    {% endif %}
+            </h3>
             </div>
             <div class="row carrier-blocks">
                 <div class="col-2">
-                    <img src="{% static 'img/prod.png' %}" alt="product" />
+                    <div class="image-product">
+                        <img src="{% static 'img/prod.png' %}" alt="product" />
+                    </div>
+                    <div class="row text-center copyright">
+                        <a href="https://www.icity.net.br">&copy; i-City Smart Environments</a>
+                    </div>
                 </div>
                 <div class="carrier-box col-10">
                 {% if not car_prepared %}
@@ -49,6 +56,9 @@
 			</div>
 		</section>
 {%endblock%}
+	{% block footer %}
+		{% include 'cfooter.html' %}
+	{% endblock %}
 	{% block scripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
     <script src="{% static 'js/carriers.js' %}"></script>

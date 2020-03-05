@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+import apps
 from django.db import models
-
 
 class Cars(models.Model):
     pk_cars = models.AutoField(primary_key=True, verbose_name='Código do Carro')
@@ -41,11 +41,62 @@ class CarsBoxes(models.Model):
         db_table = 'cars_boxes'
         verbose_name_plural = 'CarsBoxes'
 
-    def clear_box_id(self, car: int = 0):
-        if car == 0:
-            return
-        self.fisical_box_id = ''
-        return
+    @staticmethod
+    def validate_boxes(data: dict) -> dict:
+        flag_validate = True
+        msg_validate = ''
+        for key in data:
+            value = data[key][0]
+            box_level = key[1]
+            box_box = key[2]
+            if list(data.values()).count(value) > 1 or value == '':
+                flag_validate = False
+                msg_validate = 'Duplicidade de caçambas detectada '
+                msg_validate += f'(nível: {box_level} posição: {box_box} código: {value}).'
+                break
+            if str(box_level) not in apps.CAR_BOXES.keys():
+                apps.CAR_BOXES[str(box_level)] = {}
+            apps.CAR_BOXES[str(box_level)][str(box_box)] = value
+        return {
+            "car_id": apps.CAR_ID,
+            "car_prepared": int(flag_validate),
+            "flag_validate": int(flag_validate),
+            "message": msg_validate,
+        }
+
+    @staticmethod
+    def save_data(data: dict):
+        if 'csrfmiddlewaretoken' in data.keys():
+            del data['csrfmiddlewaretoken']
+        res = CarsBoxes.validate_boxes(data)
+        if not bool(res['flag_validate']):
+            return False, res
+        for level in apps.CAR_BOXES:
+            for box in apps.CAR_BOXES[level]:
+                pk = int(str(apps.CAR_ID) + str(level) + str(box))
+                try:
+                    car = Cars.objects.get(pk=apps.CAR_ID)
+                    car_box = CarsBoxes()
+                    car_box.pk_carsboxes = pk
+                    car_box.box_name = f'e{level}{box}'
+                    car_box.fisical_box_id = apps.CAR_BOXES[level][box]
+                    car_box.level = level
+                    car_box.box = box
+                    car_box.weight = 0
+                    car_box.volume = 0
+                    car_box.fk_cars = car
+                    car_box.charge_key = None   # TODO: Este campo deve conter as chaves dos cargas e pedidos dos clientes. Dicionário json em string
+                    car_box.save()
+                except Exception as e:
+                    return False, {'msg': f'Error when save carboxes! ({e})'}
+        return True, {'msg': ''}
+
+
+    # def clear_box_id(self, car: int = 0):
+    #     if car == 0:
+    #         return
+    #     self.fisical_box_id = ''
+    #     return
 
     def __str__(self):
         return self.fk_cars.dsc_car + ' - box:' + self.box_name

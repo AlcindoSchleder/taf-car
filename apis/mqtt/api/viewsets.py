@@ -24,7 +24,8 @@ class MqttViewSet(viewsets.ViewSet):
         apps.CAR_ID = car_id
         try:
             car = Cars.objects.get(pk=car_id)
-            carboxes = CarsBoxes.objects.get(pk=int(display.replace('e', '')))
+            pkcarsboxes = int(str(car.pk_cars) + display.replace('e', ''))
+            carboxes = CarsBoxes.objects.get(pk=pkcarsboxes)
             display_message = CarBoxesMessage()
             display_message.fk_car_boxes = carboxes
             display_message.flag_captured = 0

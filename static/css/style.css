@@ -124,9 +124,29 @@ header .sub-title {
 
 .carrier-blocks {
 }
-.carrier-blocks img {
-    margin-top: 15vh;
+.carrier-blocks .image-product {
+    margin-top: 10vh;
 }
+.carrier-blocks .copyright {
+    display: block;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+    margin: 0;
+	font-size: 0.8rem;
+	display: block;
+}
+.carrier-blocks .copyright a{
+	color: #7cc576;
+	font-weight: 600;
+	text-decoration: none;
+	transition: all 0.3s ease-in-out;
+	-moz-transition: all 0.3s ease-in-out;
+	-webkit-transition: all 0.3s ease-in-out;
+}
+.carrier-blocks .copyright .credits a:hover {
+	color: #fff;
+}
+
 .carrier-box {
     padding: 1%;
     height: 85%;

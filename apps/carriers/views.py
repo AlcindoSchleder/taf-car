@@ -44,7 +44,8 @@ class CarriersPageView(TemplateView):
                     response['result_to'] = 'collect_products'
                     msg_validate = response['status']['sttMsgs'] + ' - ' + response['url']
                 else:
-                    data = pdc.product_data()
+                    # TODO: Verificar o que vem em data para mostrar no render dos displays ou mensagens dos displays
+                    data = self.pdc.product_data()
         else:
             apps.prepare_boxes()
         return {
@@ -69,62 +70,12 @@ class CarriersPageView(TemplateView):
         try:
             apps.CAR_ID = request.session.get('car_id')
             param = self.collect_products(request)
+            if param['message'] == '':
+                param['message'] = request.session.get('message') if request.session.get('message') else ''
             param['host'] = host
         except Exception as e:
-            return render(request, self.template_name, {'msg_validate': e})
+            return render(request, self.template_name, {'message': e})
         return render(request, self.template_name, param)
-
-    def _validate_boxes(self, data: dict) -> dict:
-        self.flag_validate = True
-        self.msg_validate = ''
-        for key in data:
-            value = data[key][0]
-            if value == '' or key == 'csrfmiddlewaretoken':
-                continue
-            else:
-                box_level = key[1]
-                box_box = key[2]
-                if list(data.values()).count(value) > 1:
-                    self.flag_validate = False
-                    self.msg_validate = 'Duplicidade de caçambas detectada '
-                    self.msg_validate += f'(nível: {box_level} posição: {box_box} código: {value}).'
-                    break
-                if str(box_level) not in apps.CAR_BOXES.keys():
-                    apps.CAR_BOXES[str(box_level)] = {}
-                if str(box_box) not in apps.CAR_BOXES[str(box_level)].keys():
-                    apps.CAR_BOXES[str(box_level)][str(box_box)] = value
-
-        return {
-            "car_id": apps.CAR_ID,
-            "car_prepared": self.flag_validate,
-            "flag_validate": self.flag_validate,
-            "message": self.msg_validate,
-        }
-
-    def _save_data(self):
-        if not self.flag_validate:
-            return False
-        for level in apps.CAR_BOXES:
-            for box in apps.CAR_BOXES[level]:
-                pk = int(str(apps.CAR_ID) + str(level) + str(box))
-                try:
-                    car = Cars.objects.get(pk=apps.CAR_ID)
-                    car_box = CarsBoxes()
-                    car_box.pk_carboxes = pk
-                    car_box.box_name = box
-                    car_box.fisical_box_id = apps.CAR_BOXES[level][box]
-                    car_box.level = level
-                    car_box.box = box
-                    car_box.weight = 0
-                    car_box.volume = 0
-                    car_box.fk_cars = car
-                    car_box.charge_key = {}
-                    car_box.save()
-                except Exception as e:
-                    self.msg_validate = f'Error when save carboxes! ({e})'
-                    return False
-
-        return True
 
     def post(self, request):
         apps.CAR_ID = request.session.get('car_id', 0)
@@ -132,17 +83,12 @@ class CarriersPageView(TemplateView):
             message = 'Erro ao Alocar as Caixas: Identificação do Carro não foi Fornecida!'
             return redirect(apps.get_redirect_url('home:home', message=message))
 
-        data = self._validate_boxes(dict(request.POST))
-        if data['flag_validate']:
-            apps.CAR_PREPARED = True
-            # request.session['car_prepared'] = apps.CAR_PREPARED
-            if self._save_data():
-                msg = 'Configuração das Caçambas realizada com sucesso!!'
-                data = {'car_id': 1, 'car_prepared': True, 'message': msg}
-                return redirect(apps.get_redirect_url('home:home', params=data))
-            else:
-                data['message'] = self.msg_validate
-                return render(request, self.template_name, data)
+        res, msg = CarsBoxes.save_data(dict(request.POST))
+        apps.CAR_PREPARED = res
+        if res:
+            msg = 'Configuração das Caçambas realizada com sucesso!!'
+            data = {'car_id': apps.CAR_ID, 'car_prepared': True, 'message': msg}
+            return redirect(apps.get_redirect_url('home:home', params=data))
         else:
-            data['message'] = self.msg_validate
+            data = {'car_id': apps.CAR_ID, 'car_prepared': False, 'message': msg}
             return render(request, self.template_name, data)

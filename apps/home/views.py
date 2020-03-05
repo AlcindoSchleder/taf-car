@@ -33,15 +33,18 @@ class HomePageView(TemplateView):
         return result
 
     def _check_allocation_boxes(self):
-        boxes = CarsBoxes.objects.filter(pk=apps.CAR_ID)
-        if boxes.count > 0:
+        pk_cars_gt = int(f'{apps.CAR_ID}10')
+        pk_cars_lt = int(f'{apps.CAR_ID}{apps.CAR_LEVELS}{apps.CAR_BOXES_LEVEL}')
+        boxes = CarsBoxes.objects.filter(pk__range=(pk_cars_gt, pk_cars_lt), fisical_box_id__isnull=False)
+        apps.CAR_PREPARED = boxes.count() == (apps.CAR_LEVELS * apps.CAR_BOXES_LEVEL)
+        if apps.CAR_PREPARED:
             for box in boxes:
                 display_id = box.box_name
                 box_id = box.fisical_box_id
                 res = self._send_message('control', display_id, box_id)
                 if res['status']['sttCode'] != 200:
                     return False, res['status']['sttMsgs']
-        return boxes.count() > 0, ''
+        return apps.CAR_PREPARED, ''
 
     def get(self, request, *args, **kwargs):
         # proto = 'https://'
@@ -63,7 +66,8 @@ class HomePageView(TemplateView):
             message = request.GET.get('message') if request.GET.get('message') else ''
             request.session['car_id'] = apps.CAR_ID
             request.session['host'] = self.host
-            apps.CAR_PREPARED, message = self._check_allocation_boxes()
+            if not apps.CAR_PREPARED:
+                apps.CAR_PREPARED, message = self._check_allocation_boxes()
         params = {
             'car_id': apps.CAR_ID,
             'car_prepared': int(apps.CAR_PREPARED),

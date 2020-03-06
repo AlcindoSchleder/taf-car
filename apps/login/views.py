@@ -178,14 +178,16 @@ class CollectorRegisterView(View):
                     return redirect(apps.get_redirect_url('login:login', params))
                 # Save user permissions
                 for data in self.user_data:
+                    user = User.objects.get(pk=operator.user_integration)
                     perms = UsersOperatorsPermissions()
                     perms.pk_user_permissions = f'{operator.user_integration}-{data["codlinhasepar"]}'
-                    perms.codlinhasepar = data['codlinhasepar']
-                    perms.desclinhasepar = data['desclinhasepar']
-                    perms.indseparacao = data['indseparacao']
-                    perms.ls_status = data['ls_status']
+                    perms.fk_users = user
+                    perms.type_line = data['codlinhasepar']
+                    perms.dsc_line = data['desclinhasepar']
+                    perms.flag_separation = data['indseparacao']
+                    perms.flag_status = data['ls_status']
                     perms.save()
-                    apps.USER_PERMISSIONS.append(perms.codlinhasepar)
+                    apps.USER_PERMISSIONS.append(perms.type_line)
 
                 params = {
                     'car_id': apps.CAR_ID,

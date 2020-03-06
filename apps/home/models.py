@@ -25,7 +25,7 @@ class ApiHosts(models.Model):
         verbose_name_plural = 'hosts'
 
     def __str__(self):
-        return self.dsc_host
+        return f'{self.dsc_host} - {self.address}:{self.port} -> {self.FLAG_ACTIVE_OPTIONS[self.flag_active][1]}'
     # TODO: Create a signal before post to check if active host is unique
 
 

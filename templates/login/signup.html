@@ -30,21 +30,6 @@
     </section>
 {%endblock%}
 
-
-{% block scripts %}
-
-    <!-- Mensagem caso sucesso ao solicitar troca de senha -->
-    {% if messages %}
-
-    {%for message in messages%}
-    {% if 'success' in message.tags %}
-
-    <script type="text/javascript">
-        $.Admin.messages.msgSucesso("{{message}}");
-    </script>
-    {%endif%}
-    {%endfor%}
-
-    {% endif %}
-
+{% block footer %}
+    {% include 'footer.html' %}
 {% endblock %}

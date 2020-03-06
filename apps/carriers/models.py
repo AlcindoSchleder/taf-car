@@ -36,9 +36,8 @@ class CarriersProducts(models.Model):
         ('E', 'Em Execução'),
         ('X', 'Cancelada'),
         ('F', 'Finalizada'),
-
     ]
-    pk_carriers_products = models.IntegerField(primary_key=True, default=0, verbose_name='Código')
+    pk_carriers_products = models.AutoField(primary_key=True, verbose_name='Código')
     nroempresa = models.IntegerField(verbose_name='Empresa')
     nrocarga = models.IntegerField(verbose_name='Carga')
     seqlote = models.IntegerField(verbose_name='Lote')
@@ -53,58 +52,70 @@ class CarriersProducts(models.Model):
     nrosala = models.SmallIntegerField(verbose_name='Local')
     especieendereco = models.CharField(max_length=1, choices=FLAG_TYPE_ADDRESS, verbose_name='Tipo End.')
     indterreoaereo = models.CharField(max_length=1, choices=FLAG_TYPE_LOCAL, verbose_name='Tipo Local')
-    qtdembalagem = models.FloatField(verbose_name='Qtd. Embalagem')
-    qtdatual = models.FloatField(verbose_name='Qtd. Atual')
+    qtdembalagem = models.FloatField(default=0.00, verbose_name='Qtd. Embalagem')
+    qtdatual = models.FloatField(default=0.00, verbose_name='Qtd. Atual')
     statusendereco = models.CharField(max_length=1, choices=FLAG_STATUS_ADDRESS, verbose_name='Tipo Local')
     tipespecie = models.CharField(max_length=1, null=True, blank=True, verbose_name='Tipo Espécie')
     coddepossepar = models.SmallIntegerField(verbose_name='Depós. Separ.')
     destino = models.CharField(max_length=40, verbose_name='Destino')
     tipentrega = models.CharField(max_length=1, null=True, blank=True, verbose_name='Tipo Entrega')
-    mcubtotal = models.FloatField(verbose_name='Cubagem')
-    pesototal = models.FloatField(verbose_name='Peso')
+    mcubtotal = models.FloatField(default=0.00, verbose_name='Cubagem')
+    pesototal = models.FloatField(default=0.00, verbose_name='Peso')
     nrobox = models.SmallIntegerField(verbose_name='Box do Lote')
     statuscarga = models.CharField(max_length=1, choices=FLAG_STATUS_CARGO, verbose_name='Status da Carga')
-    valorcarga = models.FloatField(verbose_name='Valor da Carga')
-    qtdembcargasep = models.FloatField(verbose_name='Qtd. Emb. Separ.')
-    qtdcontada = models.FloatField(verbose_name='Qtd. Emb. Contada')
-    qtdembsolcargasep = models.FloatField(verbose_name='Qtd. Emb. Carga Solic.')
-    qtdembsepcargasep = models.FloatField(verbose_name='Qtd. Emb. Carga Separ.')
+    valorcarga = models.FloatField(default=0.00, verbose_name='Valor da Carga')
+    qtdembcargasep = models.FloatField(default=0.00, verbose_name='Qtd. Emb. Separ.')
+    qtdcontada = models.FloatField(default=0.00, verbose_name='Qtd. Emb. Contada')
+    qtdembsolcargasep = models.FloatField(default=0.00, verbose_name='Qtd. Emb. Carga Solic.')
+    qtdembsepcargasep = models.FloatField(default=0.00, verbose_name='Qtd. Emb. Carga Separ.')
     codtipatividade = models.CharField(max_length=2, verbose_name='Código Atividade')
     nroquebra = models.SmallIntegerField(verbose_name='Quebra')
     mesano = models.CharField(null=True, blank=True, max_length=5, verbose_name='Mês/Ano')
-    peso = models.FloatField(verbose_name='Peso.')
-    metragemcubica = models.FloatField(verbose_name='Cubagem')
-    qtdvolume = models.FloatField(verbose_name='Volumnes')
-    qtditem = models.FloatField(verbose_name='Items')
+    metragemcubica = models.FloatField(default=0.00, verbose_name='Cubagem')
+    qtdvolume = models.FloatField(default=0.00, verbose_name='Volumnes')
+    qtditem = models.FloatField(default=0.00, verbose_name='Items')
     indexclusao = models.CharField(max_length=1, verbose_name='Excluído')
     grauprioridade = models.IntegerField(verbose_name='Prioridade')
     statusrf = models.CharField(max_length=1, null=True, blank=True, verbose_name='Status RF')
     statusatividade = models.CharField(max_length=1, choices=FLAG_STATUS_ACTIVITY, verbose_name='Status da Atividade')
     tipseparacao = models.CharField(max_length=2, null=True, blank=True, verbose_name='Tipo Serpação')
     tiplote = models.CharField(max_length=2, null=True, blank=True, verbose_name='Tipo Lote')
-    pesototallote = models.FloatField(verbose_name='Peso Lote')
-    mcubtotallote = models.FloatField(verbose_name='Cubagem Lote')
-    qtdvolumelote = models.FloatField(verbose_name='Valumes Lote')
-    qtditemlote = models.FloatField(verbose_name='Items do Lote')
+    pesototallote = models.FloatField(default=0.00, verbose_name='Peso Lote')
+    mcubtotallote = models.FloatField(default=0.00, verbose_name='Cubagem Lote')
+    qtdvolumelote = models.FloatField(default=0.00, verbose_name='Valumes Lote')
+    qtditemlote = models.FloatField(default=0.00, verbose_name='Items do Lote')
     seqordenacaoseparacao = models.IntegerField(verbose_name='Ordem Separação')
     seqpessoa = models.IntegerField(verbose_name='Código Cliente')
-    qtdembsolcarga = models.FloatField(verbose_name='Qtd. Emb. Solic.')
-    qtdembcarga = models.FloatField(verbose_name='Qtd. Emb.')
-    qtdembsepcarga = models.FloatField(verbose_name='Qtd. Emb. Separada')
+    qtdembsolcarga = models.FloatField(default=0.00, verbose_name='Qtd. Emb. Solic.')
+    qtdembcarga = models.FloatField(default=0.00, verbose_name='Qtd. Emb.')
+    qtdembsepcarga = models.FloatField(default=0.00, verbose_name='Qtd. Emb. Separada')
     nropedvenda = models.IntegerField(null=True, blank=True, verbose_name='Número Pedido')
-    status = models.CharField(max_length=1, null=True, blank=True, verbose_name='Status')
+    embalagem = models.CharField(max_length=5, default='', verbose_name='Unidade')
+    peso = models.FloatField(default=0.00, verbose_name='Peso??')
+    pesobruto = models.FloatField(default=0.00, verbose_name='Peso Bruto')
+    pesoliquido = models.FloatField(default=0.00, verbose_name='Peso Líquido')
+    altura = models.FloatField(default=0.00, verbose_name='Altura')
+    largura = models.FloatField(default=0.00, verbose_name='Largura')
+    profundidade = models.FloatField(default=0.00, verbose_name='Profundidade')
+    status = models.CharField(max_length=1, default='L', verbose_name='Status')
     insert_date = models.DateTimeField(auto_now=True, verbose_name='Data')
 
     class Meta:
-        db_table = 'cargo_products'
+        db_table = 'interface_charge'
+        verbose_name_plural = 'Carga Original'
 
 
 class LastCharge(models.Model):
     pk_last_charge = models.SmallIntegerField(primary_key=True, verbose_name='Código da Carga', default=1)
-    date_last_charge = models.DateTimeField(auto_now=True, verbose_name='Data da Carga')
+    fk_company = models.IntegerField(null=True, blank=True, verbose_name='Empresa')
+    num_lot = models.IntegerField(null=True, blank=True, verbose_name='Lote')
+    fk_product = models.IntegerField(null=True, blank=True, verbose_name='Produto')
+    fk_customer = models.IntegerField(null=True, blank=True, verbose_name='Código Cliente')
+    date_last_charge = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name='Data da Carga')
 
     class Meta:
         db_table = 'app_last_charge'
+        verbose_name_plural = 'Última Carga'
 
 
 class Products(models.Model):
@@ -115,6 +126,10 @@ class Products(models.Model):
     unity = models.CharField(max_length=5, verbose_name='Unidade')
     qtd_unity = models.FloatField(verbose_name='QUant. da Unidade')
     image_prod = models.TextField(blank=True, null=True, verbose_name='Imagem')     # Base64 decoded image (text)
+
+    class Meta:
+        db_table = 'products'
+        verbose_name_plural = 'Produtos'
 
 
 class CarriersCars(models.Model):
@@ -163,3 +178,5 @@ class CarriersCars(models.Model):
 
     class Meta:
         db_table = 'carrier_products'
+        verbose_name_plural = 'Carga Produtos'
+

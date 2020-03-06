@@ -1,31 +1,33 @@
 # -*- coding: utf-8 -*-
 import socket
-import time
+from apps.home.models import ApiHosts
 
 
 class CheckHost:
-    _HOSTS = {}
-
     _PORT = 5180
     _TIMEOUT = 1.5
+    _client = None
 
-    _client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def __init__(self, hosts: dict):
-        self._HOSTS = hosts if len(hosts) > 0 else {}
+    def __init__(self):
+        self._client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._client.settimeout(self._TIMEOUT)
 
-    def _try_hosts(self):
-        for host in self._HOSTS:
-            try:
-                self._client.connect((self._HOSTS[host], int(self._PORT)))
-                self._client.shutdown(socket.SHUT_RDWR)
-                return self._HOSTS[host]
-            except Exception as e:
-                time.sleep(1)
-            finally:
-                self._client.shutdown(socket.SHUT_RDWR)
-        return None
+    def _try_hosts(self, host: str):
+        try:
+            self._client.connect((self._HOSTS[host], int(self._PORT)))
+            self._client.shutdown(socket.SHUT_RDWR)
+            self._client.close()
+            return self._HOSTS[host]
+        except socket.error:
+            self._client.shutdown(socket.SHUT_RDWR)
+            self._client.close()
+            return None
+        finally:
+            self._client.shutdown(socket.SHUT_RDWR)
+            self._client.close()
 
     def check_hosts(self):
-        return self._try_hosts()
+        server = None
+        host = ApiHosts.objects.get(flag_active=1)
+        server = self._try_hosts(host)
+        return server

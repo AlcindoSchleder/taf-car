@@ -26,27 +26,10 @@
                 </div>
             </form>
             {%endif%}
-            {% include 'home/modal.html' %}
-            <div class="alert alert-danger d-none">{{message}}</div>
         </div>
     </section>
 {%endblock%}
 
-
-{% block scripts %}
-
-    <!-- Mensagem caso sucesso ao solicitar troca de senha -->
-    {% if messages %}
-
-    {%for message in messages%}
-    {% if 'success' in message.tags %}
-
-    <script type="text/javascript">
-        $.Admin.messages.msgSucesso("{{message}}");
-    </script>
-    {%endif%}
-    {%endfor%}
-
-    {% endif %}
-
+{% block footer %}
+    {% include 'footer.html' %}
 {% endblock %}

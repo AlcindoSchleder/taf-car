@@ -42,8 +42,15 @@ class UserFormView(View):
         if request.POST and form.is_valid():
             username = form.cleaned_data['password']
             password = form.cleaned_data['password']
-            user = form.authenticate_user(username=username, password=password)
+            res = form.authenticate_user(username=username, password=password)
             try:
+                if res['status']['sttCode'] != 200:
+                    message = res['status']['sttMsgs']
+                    return render(
+                        request,
+                        self.template_name,
+                        {'form': form, 'car_id': apps.CAR_ID, 'message': message}
+                    )
                 apps.USER_NAME = username
                 apps.USER_DATA = form.result
                 if user is not None:
@@ -67,7 +74,7 @@ class UserFormView(View):
                 code = form.result['status']['sttCode']
                 message = f'Error: Login user exception: ({code}) - {e}'
 
-        return render(request, self.template_name, {'form': form, 'cardid': apps.CAR_ID, 'message': message})
+        return render(request, self.template_name, {'form': form, 'car_id': apps.CAR_ID, 'message': message})
 
 
 class CollectorRegisterView(View):

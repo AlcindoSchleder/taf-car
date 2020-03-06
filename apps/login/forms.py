@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import apps
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -12,7 +13,6 @@ class UserLoginForm(forms.ModelForm):
     username = None
     password = None
     flag_ins = False
-    result = api.result
 
     HTTP_API_GET_OPERATOR = 'tafApi/login/1.0'
 
@@ -45,10 +45,12 @@ class UserLoginForm(forms.ModelForm):
 
     def authenticate_user(self, username=None, password=None):
         self.flag_ins = False
+        res = apps.result_dict()
         username = username if username else self.username
         password = password if password else self.password
 
         user = authenticate(username=username, password=password)
+        res = apps.result_dict()
         if not user:
             try:
                 api.set_end_points({'login': f'/{self.HTTP_API_GET_OPERATOR}/{username}'})
@@ -57,13 +59,12 @@ class UserLoginForm(forms.ModelForm):
                     res = res['data']
                     if len(res['records']) > 0 and str(res['records'][0]['codprodutivo']) == password:
                         self.flag_ins = True
-                        self.result['records'] = res['records']
-                        self.result['flag_ins'] = self.flag_ins
-                else:
-                    self.result = res
             except Exception as e:
-                raise e
-        return user
+                res['status']['sttCode'] = 500
+                res['status']['sttMsgs'] = f'Erro ao ler os dados do usuário no E.R.P. - {e}'
+                return res
+        res['user'] = user
+        return res
 
 
 class CollectorRegisterForm(forms.ModelForm):

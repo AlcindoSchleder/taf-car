@@ -2,6 +2,33 @@
 import apps
 from django.db import models
 
+
+class ApiHosts(models.Model):
+    TYPE_NET_OPTIONS = [
+        (0, 'LAN'),
+        (1, 'WAN'),
+    ]
+    FLAG_ACTIVE_OPTIONS = [
+        (0, 'Inativo'),
+        (1, 'Ativo')
+    ]
+    pk_api_hosts = models.AutoField(primary_key=True, verbose_name='Código')
+    dsc_host = models.CharField(max_length=50, verbose_name='Descrição')
+    type_net = models.SmallIntegerField(choices=TYPE_NET_OPTIONS, default=0, verbose_name='Tipo NET')
+    address = models.GenericIPAddressField(default='127.0.0.1', verbose_name='IP')
+    port = models.IntegerField(default=5180, verbose_name='Porta')
+    flag_active = models.SmallIntegerField(default=0, choices=FLAG_ACTIVE_OPTIONS, verbose_name='Ativo')
+    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data Inserção')
+
+    class Meta:
+        db_table = 'icity_hosts'
+        verbose_name_plural = 'hosts'
+
+    def __str__(self):
+        return self.dsc_host
+    # TODO: Create a signal before post to check if active host is unique
+
+
 class Cars(models.Model):
     pk_cars = models.AutoField(primary_key=True, verbose_name='Código do Carro')
     dsc_car = models.CharField(max_length=50, verbose_name='Descrição')
@@ -11,7 +38,7 @@ class Cars(models.Model):
 
     class Meta:
         db_table = 'cars'
-        verbose_name_plural = 'Cars'
+        verbose_name_plural = 'Carros'
 
     def __str__(self):
         return self.dsc_car
@@ -39,7 +66,7 @@ class CarsBoxes(models.Model):
 
     class Meta:
         db_table = 'cars_boxes'
-        verbose_name_plural = 'CarsBoxes'
+        verbose_name_plural = 'Boxes'
 
     @staticmethod
     def validate_boxes(data: dict) -> dict:
@@ -91,13 +118,6 @@ class CarsBoxes(models.Model):
                     return False, {'msg': f'Error when save carboxes! ({e})'}
         return True, {'msg': ''}
 
-
-    # def clear_box_id(self, car: int = 0):
-    #     if car == 0:
-    #         return
-    #     self.fisical_box_id = ''
-    #     return
-
     def __str__(self):
         return self.fk_cars.dsc_car + ' - box:' + self.box_name
 
@@ -116,7 +136,7 @@ class CarBoxesMessage(models.Model):
 
     class Meta:
         db_table = 'cars_boxes_message'
-        verbose_name_plural = 'CarsBoxesMessages'
+        verbose_name_plural = 'Mensagens'
 
     def __str__(self):
         return self.box_name

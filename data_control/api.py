@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-import socket
-# import platform    # For getting the operating system name
-# import subprocess  # For executing a shell command
-from taf_car.settings import API_URLS
-from apps import RESULT_DICT
 import requests
 import json
+from apps import result_dict
+from contrib.check import CheckHost
 
 
 class ApiHostAccess:
@@ -15,36 +12,18 @@ class ApiHostAccess:
     proto = 'http'
     port = 5180
     url = f'{proto}://%s:{port}%s'
-    result = RESULT_DICT
+    result = None
 
     def __init__(self, end_points: dict):
+        self.result = result_dict()
         self.END_POINTS = {}
         if len(end_points) > 0:
             for endpoint in end_points:
                 self.END_POINTS[endpoint] = end_points[endpoint]
 
-    def _check_hosts(self) -> str:
-        """
-        Returns True if host (str) responds to a ping request.
-        Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
-        """
-        self.host = None
-        # Option for the number of packets as a function of
-        # param = '-n' if platform.system().lower() == 'windows' else '-c'
-        for host in API_URLS:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            code = sock.connect_ex((API_URLS[host], 5180))
-            if code == 0:
-                self.host = API_URLS[host]
-                break
-            # Building the command. Ex: "ping -c 1 host" -> NOT RUN A LOCAL AND SERVER
-            # command = ['ping', param, '1', API_URLS[host]]
-            # if subprocess.call(command) == 0:
-        return self.host
-
     def get_data(self, endpoint: str) -> dict:
-        self.host = self._check_hosts()
+        check = CheckHost()
+        self.host = check.check_hosts()
         if not self.host:
             self.result['status']['sttCode'] = 404
             self.result['status']['sttMsgs'] = 'Error: Host(s) not found!'

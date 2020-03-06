@@ -32,7 +32,7 @@ class CarriersPageView(TemplateView):
 
     def collect_products(self, request) -> dict:
         response = None
-        msg_validate = ''
+        message = ''
 
         if apps.CAR_COLLECT_PRODUCTS:
             self.pdc = ProductDataControl()
@@ -42,7 +42,7 @@ class CarriersPageView(TemplateView):
                     self._reset_car()
                     logout(request)
                     response['result_to'] = 'collect_products'
-                    msg_validate = response['status']['sttMsgs'] + ' - ' + response['url']
+                    message = response['status']['sttMsgs'] + ' - ' + response['url']
                 else:
                     # TODO: Verificar o que vem em data para mostrar no render dos displays ou mensagens dos displays
                     data = self.pdc.product_data()
@@ -50,7 +50,7 @@ class CarriersPageView(TemplateView):
             apps.prepare_boxes()
         return {
             "response": response,
-            "msg_validate": msg_validate,
+            "message": message,
             "car_id": apps.CAR_ID,
             "car_prepared": int(apps.CAR_PREPARED),
             "car_collect_products": int(apps.CAR_COLLECT_PRODUCTS),
@@ -70,8 +70,6 @@ class CarriersPageView(TemplateView):
         try:
             apps.CAR_ID = request.session.get('car_id')
             param = self.collect_products(request)
-            if param['message'] == '':
-                param['message'] = request.session.get('message') if request.session.get('message') else ''
             param['host'] = host
         except Exception as e:
             return render(request, self.template_name, {'message': e})

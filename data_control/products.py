@@ -12,13 +12,28 @@ from django.utils import timezone
 from taf_car.settings import API_URLS
 from apps import CAR_ID, RESULT_DICT, USER_NAME, result_dict
 from contrib.check import CheckHost
-from apps.carriers.models import LastCharge, CarriersCars
+from apps.carriers.models import CarriersProducts, LastCharge, CarriersCars
 from apps.login.models import UsersOperatorsPermissions
 from apps.home.models import Cars, CarsBoxes
 
 
 class ProductDataControl:
 
+    API_FIELDS = [
+        'seqproduto', 'desccompleta', 'descreduzida', 'codrua',
+        'nropredio', 'nroapartamento', 'nrosala', 'especieendereco',
+        'indterreoaereo', 'qtdatual', 'statusendereco', 'tipespecie',
+        'nroempresa', 'nrocarga', 'coddepossepar', 'destino', 'tipentrega',
+        'pesototal', 'mcubtotal', 'especieendereco.1', 'nrobox', 'statuscarga',
+        'valorcarga', 'seqlote', 'qtdcontada', 'seqtarefa', 'seqatividade',
+        'codtipatividade', 'nroquebra', 'mesano', 'peso', 'metragemcubica',
+        'qtdvolume', 'qtditem', 'indexclusao', 'grauprioridade', 'statusrf',
+        'statusatividade', 'tipseparacao', 'tiplote', 'pesototallote',
+        'mcubtotallote', 'qtdvolumelote', 'qtditemlote',
+        'seqordenacaoseparacao', 'seqpessoa', 'qtdembcarga', 'qtdembsolcarga',
+        'qtdembsepcarga', 'nropedvenda', 'embalagem', 'pesobruto',
+        'pesoliquido', 'altura', 'largura', 'profundidade'
+    ]
     END_POINTS = {
         'all_products': '/tafApi/product/1.0/{p1}',
         'fractional_products': '/tafApi/product/1.0/fractional/{p1}',
@@ -52,7 +67,7 @@ class ProductDataControl:
     _PORT = 5180
     _TIMEOUT = 3.5
     result = RESULT_DICT
-    url = f'{_PROTO}://%s:{_PORT}%s'
+    url = None
     df = None
     df_original = None
     host = None
@@ -64,11 +79,10 @@ class ProductDataControl:
         try:
             data = None
             for index, row in self.df_original.iterrows():
-                row['pk_carriers_products'] = self.df_original.index[index]
-                data = CarriersCars(**row)
+                data = CarriersProducts(**row)
                 data.save()
             reg = LastCharge(
-                pk_last_charge=data['nrocarga'],
+                pk_last_charge=data.nrocarga,
                 date_last_charge=datetime.now(tz=timezone.utc)
             )
             reg.save()
@@ -91,15 +105,14 @@ class ProductDataControl:
             res['status']['sttCode'] = 404
             res['status']['sttMsgs'] = f'Error: API Host or API name {api_name} not found!'
             return res
-        params = {}
-        # params = {
-        #     'charge': pk_last_charge
-        # }
+        params = {
+            'p1': pk_last_charge
+        }
         end_point = self.END_POINTS[api_name].format(**params) \
             if len(params) > 0 and self.END_POINTS[api_name].find('{p') > -1 \
             else self.END_POINTS[api_name]
 
-        self.url = self.url % self.host, end_point    # mount URL
+        self.url = f'{self._PROTO}://{self.host}:{self._PORT}{end_point}'    # mount URL
         res['url'] = self.url
 
         headers = {'Content-Type': 'application/json'}
@@ -113,26 +126,57 @@ class ProductDataControl:
                 f'Error on API {api_name} ({self.url}) to load products from ERP: [{e}]'
         return res
 
+    def _test_data_frame_fields(self, flag_from_data: bool):
+        index = self.df_original.shape
+        if (flag_from_data == 2) or (flag_from_data == 3):
+            if index[0] == len(self.API_FIELDS):
+                for field in self.API_FIELDS:
+                    flag = field in self.df_original.columns
+                    if not flag:
+                        return False
+            else:
+                return False
+        else:
+            return False
+        row = self.df_original.iloc[index[0] - 1]
+        pk_charge = row['nrocarga']
+        try:
+            res = CarriersProducts.objects.get(nrocarga=pk_charge)
+        except ObjectDoesNotExist:
+            res = True
+        return res
+
     def _get_products_data_frame(self):
         res = result_dict()
         carriers = CarriersCars.objects.filter(fk_cars_id=CAR_ID, flag_status='L')
         if carriers.count() > 0:
             pd.DataFrame(list(carriers))
+            res['status']['from_data'] = 1
         else:
             res = self._get_products_from_api('all_products')
-            if res['status']['sttCode'] == 200 and res['data'] is not None:
+            if res['status']['sttCode'] == 200 and res['data'] is not None and len(res['data']['records']) > 0:
                 self.df = pd.DataFrame(res['data']['records'])
-        if not res['status']['sttCode'] == 200:
-            file_name = "./temp/produtos.csv"
-            if os.path.exists(file_name):
-                self.df = pd.read_csv(file_name, delimiter=';', encoding='latin1')
+                res['status']['from_data'] = 2
+            else:
+                file_name = "./temp/carga_produtos.csv"
+                if os.path.exists(file_name):
+                    self.df = pd.read_csv(file_name, delimiter=',', encoding='latin1')
+                    res['status']['from_data'] = 3
         if self.df is None:
             res['status']['sttCode'] = 500
             res['status']['sttMsgs'] = 'Error: None data found to Data Frame!'
             return res
         self.df['status'] = 'L'
         self.df_original = self.df.copy()
-        self._save_charge_products()
+        """
+        res['status']['from_data']:
+        1: banco de dados classificado
+        2: api não classificada
+        3: csv semi-classificada
+        """
+
+        if self._test_data_frame_fields(res['status']['from_data']):
+            self._save_charge_products()
         res['data'] = []
         return res
 
@@ -330,7 +374,7 @@ class ProductDataControl:
                 if flag_filter == -1:
                     self.result['status']['sttMsgs'] = f'Usuário {USER_NAME} não ainda não possui atividades!'
                 elif flag_filter == -2:
-                    self.result['status']['sttMsgs'] = f'Erro: Nenhuma Caçamba foi alocada para o carro: {CAR_ID}'
+                    self.result['status']['sttMsgs'] = f'Erro: Nenhuma caçamba foi alocada para o carro: {CAR_ID}'
                 else:
                     self.result['status']['sttMsgs'] = 'Erro Desconhecido: Entre em contato com o suporte' + \
                                                        f' e informe o seguinte código: {CAR_ID}-{flag_filter}'

@@ -44,34 +44,33 @@ class UserFormView(View):
             password = form.cleaned_data['password']
             res = form.authenticate_user(username=username, password=password)
             try:
-                if res['status']['sttCode'] != 200:
-                    message = res['status']['sttMsgs']
-                    return render(
-                        request,
-                        self.template_name,
-                        {'form': form, 'car_id': apps.CAR_ID, 'message': message}
-                    )
+                user = res['user']
                 apps.USER_NAME = username
-                apps.USER_DATA = form.result
+                apps.USER_DATA = res['records'] if 'records' in res.keys() else None
                 if user is not None:
                     login(request, user)
                     apps.CAR_COLLECT_PRODUCTS = True
                     params = {
-                        'car_id': 1,
+                        'car_id': apps.CAR_ID,
                         'car_prepared': 1,
                         'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
                         'user': request.user.username,
                         'message': ''
                     }
-                    return redirect(apps.get_redirect_url('carriers:carriers', params=params))
+                    return redirect(apps.get_redirect_url('carriers:carriers', params))
                 elif form.flag_ins:
-                    return redirect('login:signup')
+                    params = {
+                        'car_id': apps.CAR_ID,
+                        'message': '',
+                        'user_data': apps.USER_DATA[0]
+                    }
+                    return redirect(apps.get_redirect_url('login:signup', params))
                 else:
                     apps.USER_NAME = None
                     apps.USER_DATA = None
                     message = 'Error: Usuário não encontrado ou não possui atividades até agora!'
             except Exception as e:
-                code = form.result['status']['sttCode']
+                code = res['status']['sttCode']
                 message = f'Error: Login user exception: ({code}) - {e}'
 
         return render(request, self.template_name, {'form': form, 'car_id': apps.CAR_ID, 'message': message})
@@ -82,13 +81,34 @@ class CollectorRegisterView(View):
     template_name = 'login/signup.html'
     user_data = None
 
+    def _get_initial(self):
+        if self.user_data is not None:
+            data = self.user_data[0]
+            mail_name = str(data['produtivo']).split(' ')[0].lower()
+            return {
+                'user_integration': data['codprodutivo'],
+                'first_name': str(data['produtivo']).split(' ')[0],
+                'last_name': ' '.join(data['produtivo'].split(' ')[1:]),
+                'email': f'{mail_name}.operador@tafdistribuidora.com.br'
+            }
+        return None
+
     def get(self, request):
-        form = self.form_class(None)
-        apps.CAR_ID = request.session.get('car_id')
         self.user_data = apps.USER_DATA
+        initial_data = self._get_initial()
+        apps.CAR_ID = request.session.get('car_id')
+
+        form = self.form_class(initial_data)
 
         if request.user.is_authenticated:
-            return redirect('carriers:carriers')
+            params = {
+                'car_id': apps.CAR_ID,
+                'car_prepared': 1,
+                'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
+                'user': request.user.username,
+                'message': ''
+            }
+            return redirect(apps.get_redirect_url('carriers:carriers', params))
         return render(request, self.template_name, {'form': form, 'car_id': apps.CAR_ID})
 
     def save_user_operators(self, form):
@@ -99,20 +119,20 @@ class CollectorRegisterView(View):
         operator.last_name = form.cleaned_data.get('last_name')
         operator.email = form.cleaned_data.get('email')
         operator.flag_tuser = 4
-        operator.user_integration = form.cleaned_data.get('username')
+        operator.user_integration = form.cleaned_data.get('user_integration')
         # Fields get from external API
         operator.fk_cars = cars
-        operator.nroempresa = self.user_data['records'][0]['nroempresa']
-        operator.tipprodutivo = self.user_data['records'][0]['tipprodutivo']
-        operator.statusprodutivo = self.user_data['records'][0]['statusprodutivo']
-        operator.inddisponibilidade = self.user_data['records'][0]['inddisponibilidade']
+        operator.nroempresa = self.user_data[0]['nroempresa']
+        operator.tipprodutivo = self.user_data[0]['tipprodutivo']
+        operator.statusprodutivo = self.user_data[0]['statusprodutivo']
+        operator.inddisponibilidade = self.user_data[0]['inddisponibilidade']
         operator.user_integration = apps.USER_NAME
         clock = datetime.time(datetime.strptime(
-            self.user_data['records'][0]['horinijornada'], '%H%M'
+            self.user_data[0]['horinijornada'], '%H%M'
         ))
         operator.horinijornada = clock
         clock = datetime.time(datetime.strptime(
-            self.user_data['records'][0]['horfimjornada'], '%H%M'
+            self.user_data[0]['horfimjornada'], '%H%M'
         ))
         operator.horfimjornada = clock
         # Save User into django auth
@@ -149,10 +169,15 @@ class CollectorRegisterView(View):
                 operator = self.save_user_operators(form)
                 message = self.check_operator_rules(operator)
                 if message:
-                    return redirect('login:login')
+                    params = {
+                        'car_id': apps.CAR_ID,
+                        'car_prepared': 1,
+                        'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
+                        'message': ''
+                    }
+                    return redirect(apps.get_redirect_url('login:login', params))
                 # Save user permissions
-                regs = self.user_data['records']
-                for data in regs:
+                for data in self.user_data:
                     perms = UsersOperatorsPermissions()
                     perms.pk_user_permissions = f'{operator.user_integration}-{data["codlinhasepar"]}'
                     perms.codlinhasepar = data['codlinhasepar']
@@ -162,7 +187,20 @@ class CollectorRegisterView(View):
                     perms.save()
                     apps.USER_PERMISSIONS.append(perms.codlinhasepar)
 
-                return redirect('carriers:carriers')
+                params = {
+                    'car_id': apps.CAR_ID,
+                    'car_prepared': 1,
+                    'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
+                    'user': operator.user_integration,
+                    'message': '',
+                }
+                return redirect(apps.get_redirect_url('carriers:carriers', params))
         else:
-            form = self.form_class()
-        return render(request, 'signup.html', {'form': form})
+            initial_data = self._get_initial()
+            form = self.form_class(initial_data)
+        params = {
+            'form': form,
+            'car_id': apps.CAR_ID,
+            'message': ''
+        }
+        return render(request, 'signup.html', params)

@@ -50,7 +50,6 @@ class UserLoginForm(forms.ModelForm):
         password = password if password else self.password
 
         user = authenticate(username=username, password=password)
-        res = apps.result_dict()
         if not user:
             try:
                 api.set_end_points({'login': f'/{self.HTTP_API_GET_OPERATOR}/{username}'})

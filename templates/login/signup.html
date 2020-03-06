@@ -5,7 +5,6 @@
 
 {%block content%}
     <section class="container login-box text-center">
-        {% if carid > 0 and not request.user.is_authenticated %}
         <form class="form-register" id="register" method="POST">
             {% csrf_token %}
             <div class="msg mb-5 h3">
@@ -25,8 +24,6 @@
                 </div>
             </div>
         </form>
-        {%endif%}
-        {% include 'home/modal.html' %}
     </section>
 {%endblock%}
 

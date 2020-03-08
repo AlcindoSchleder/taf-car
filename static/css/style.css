@@ -102,6 +102,9 @@ header .sub-title {
     padding-top: 20vh;
     height: 65vh;
 }
+.login-box .card {
+    background-color: transparent;
+}
 .form-login .msg {
     margin-top: 10px;
     color: #fff;
@@ -112,7 +115,6 @@ header .sub-title {
 .form-login .btn-send {
     margin-top: 20px;
 }
-
 
 /* Carrier Boxes */
 .carrier-title {

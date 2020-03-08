@@ -5,11 +5,12 @@
 
 {%block content%}
     <section class="container login-box text-center">
+        <h2>Identificação do Usuário</h2>
         <div class="card">
             {% if not request.user.is_authenticated %}
             <form class="form-login" id="login" method="POST">
                 {% csrf_token %}
-                <div class="msg">Carro {{car_id}}: Digite seu código de usuário:
+                <div class="msg text-warning">Carro {{car_id}}: Digite seu código de usuário:
                 {% include 'home/form_error_msg.html' %}
                 </div>
                 {% for field in form %}

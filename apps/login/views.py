@@ -57,14 +57,14 @@ class UserFormView(View):
                         'user': request.user.username,
                         'message': ''
                     }
-                    return redirect(apps.get_redirect_url('carriers:carriers', params))
+                    return redirect(apps.get_redirect_url('carriers:carriers', params=params))
                 elif form.flag_ins:
                     params = {
                         'car_id': apps.CAR_ID,
                         'message': '',
                         'user_data': apps.USER_DATA[0]
                     }
-                    return redirect(apps.get_redirect_url('login:signup', params))
+                    return redirect(apps.get_redirect_url('login:signup', params=params))
                 else:
                     apps.USER_NAME = None
                     apps.USER_DATA = None
@@ -108,7 +108,7 @@ class CollectorRegisterView(View):
                 'user': request.user.username,
                 'message': ''
             }
-            return redirect(apps.get_redirect_url('carriers:carriers', params))
+            return redirect(apps.get_redirect_url('carriers:carriers', params=params))
         return render(request, self.template_name, {'form': form, 'car_id': apps.CAR_ID})
 
     def save_user_operators(self, form):
@@ -175,7 +175,7 @@ class CollectorRegisterView(View):
                         'car_collect_products': int(apps.CAR_COLLECT_PRODUCTS),
                         'message': ''
                     }
-                    return redirect(apps.get_redirect_url('login:login', params))
+                    return redirect(apps.get_redirect_url('login:login', params=params))
                 # Save user permissions
                 for data in self.user_data:
                     user = User.objects.get(pk=operator.user_integration)
@@ -196,7 +196,7 @@ class CollectorRegisterView(View):
                     'user': operator.user_integration,
                     'message': '',
                 }
-                return redirect(apps.get_redirect_url('carriers:carriers', params))
+                return redirect(apps.get_redirect_url('carriers:carriers', params=params))
         else:
             initial_data = self._get_initial()
             form = self.form_class(initial_data)

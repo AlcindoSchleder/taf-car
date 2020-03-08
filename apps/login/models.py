@@ -58,7 +58,7 @@ class UsersOperatorsPermissions(models.Model):
         ('FB', 'Fracionado Bebidas'),
         ('FF', 'Leveza Papel Higiênico'),
         ('FG', 'Fracionado Gerais'),
-        ('FL', 'Leveza Fardaria Randeza'),
+        ('FL', 'Leveza Fardaria Grandeza'),
         ('LA', 'Licitação Alimento'),
         ('LF', 'Limpeza Fracionada'),
         ('LG', 'Limpeza Grandeza'),
@@ -73,7 +73,7 @@ class UsersOperatorsPermissions(models.Model):
     #
     pk_user_permissions = models.CharField(max_length=30, primary_key=True, verbose_name='User-Permisson')
     fk_users = models.ForeignKey(User, default=0, on_delete=models.CASCADE, verbose_name='Usuário')
-    type_line = models.CharField(max_length=2, default='Lf', choices=TYPE_LINE_OPTIONS, verbose_name='Linha de Separação')
+    type_line = models.CharField(max_length=2, default='LF', choices=TYPE_LINE_OPTIONS, verbose_name='Linha de Separação')
     dsc_line = models.CharField(max_length=50, verbose_name='Descrição')
     flag_separation = models.CharField(max_length=1, default='R', verbose_name='Separação')
     flag_status = models.CharField(max_length=1, default='A', choices=FLAG_STATUS, verbose_name='status')
@@ -82,4 +82,4 @@ class UsersOperatorsPermissions(models.Model):
         db_table = 'user_permissions'
 
     def __str__(self):
-        return f'{self.desclinhasepar} - {self.codlinhasepar}'
+        return f'{self.fk_users.first_name} - {self.dsc_line} - {self.type_line}'

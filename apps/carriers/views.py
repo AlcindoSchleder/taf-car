@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from data_control.products import ProductDataControl
 from apps.home.models import Cars, CarsBoxes
-from apps.carriers.models import CarriersCars
+from apps.carriers.models import Carriers
 from urllib.parse import urlparse
 import apps
 
@@ -36,16 +36,16 @@ class CarriersPageView(TemplateView):
 
         if apps.CAR_COLLECT_PRODUCTS:
             self.pdc = ProductDataControl()
+            apps.USER_NAME = request.user.username
             response = self.pdc.fractional_products
-            if type(response) == 'dict':
-                if response['status']['sttCode'] != 200:
-                    self._reset_car()
-                    logout(request)
-                    response['result_to'] = 'collect_products'
-                    message = response['status']['sttMsgs'] + ' - ' + response['url']
-                else:
-                    # TODO: Verificar o que vem em data para mostrar no render dos displays ou mensagens dos displays
-                    data = self.pdc.product_data()
+            if response['status']['sttCode'] != 200:
+                self._reset_car()
+                logout(request)
+                response['result_to'] = 'collect_products'
+                message = response['status']['sttMsgs'] + ' - ' + response['url']
+            else:
+                # TODO: Verificar o que vem em data para mostrar no render dos displays ou mensagens dos displays
+                data = self.pdc.product_data()
         else:
             apps.prepare_boxes()
         return {
@@ -63,10 +63,8 @@ class CarriersPageView(TemplateView):
         host = f'{site_uri.scheme}://{site_uri.netloc}'
         flag = 'car_prepared'
         apps.CAR_PREPARED = bool(int(request.GET.get(flag))) if request.GET.get(flag) else False
-        # apps.CAR_PREPARED = bool(apps.CAR_PREPARED)
         flag = 'car_collect_products'
         apps.CAR_COLLECT_PRODUCTS = bool(int(request.GET.get(flag))) if request.GET.get(flag) else False
-        # apps.CAR_COLLECT_PRODUCTS = bool(apps.CAR_COLLECT_PRODUCTS)
         try:
             apps.CAR_ID = request.session.get('car_id')
             param = self.collect_products(request)

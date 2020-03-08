@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from apps.home.models import Cars, CarsBoxes
+from django.contrib.auth.models import User
 
 
-class CarriersProducts(models.Model):
+class CargasProdutos(models.Model):
     FLAG_TYPE_ADDRESS = [
         ('A', 'Grandeza'),
         ('M', 'Miudeza'),
@@ -37,7 +38,7 @@ class CarriersProducts(models.Model):
         ('X', 'Cancelada'),
         ('F', 'Finalizada'),
     ]
-    pk_carriers_products = models.AutoField(primary_key=True, verbose_name='Código')
+    pk_cargas_produtos = models.AutoField(primary_key=True, verbose_name='Código de Acesso')
     nroempresa = models.IntegerField(verbose_name='Empresa')
     nrocarga = models.IntegerField(verbose_name='Carga')
     seqlote = models.IntegerField(verbose_name='Lote')
@@ -101,12 +102,16 @@ class CarriersProducts(models.Model):
     insert_date = models.DateTimeField(auto_now=True, verbose_name='Data')
 
     class Meta:
-        db_table = 'interface_charge'
-        verbose_name_plural = 'Carga Original'
+        db_table = 'consinco_cargas'
+        verbose_name_plural = 'ConsincoCargas'
+
+    def __str__(self):
+        return f'carga:{self.nrocarga} lote:{self.seqlote} cliente:{self.seqpessoa} produto:{self.desccompleta}'
 
 
 class LastCharge(models.Model):
     pk_last_charge = models.SmallIntegerField(primary_key=True, verbose_name='Código da Carga', default=1)
+    fk_cargas_produtos = models.ForeignKey(CargasProdutos, default=0, on_delete=models.CASCADE, verbose_name='Cargas')
     fk_company = models.IntegerField(null=True, blank=True, verbose_name='Empresa')
     num_lot = models.IntegerField(null=True, blank=True, verbose_name='Lote')
     fk_product = models.IntegerField(null=True, blank=True, verbose_name='Produto')
@@ -114,8 +119,11 @@ class LastCharge(models.Model):
     date_last_charge = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name='Data da Carga')
 
     class Meta:
-        db_table = 'app_last_charge'
+        db_table = 'icity_last_charge'
         verbose_name_plural = 'Última Carga'
+
+    def __str__(self):
+        return f'{self.pk_last_charge} - Cliente: {self.fk_customer} - Produto: {self.fk_product}'
 
 
 class Products(models.Model):
@@ -123,53 +131,54 @@ class Products(models.Model):
     dsc_prod = models.CharField(max_length=50, verbose_name='Descrição')
     volume = models.FloatField(verbose_name='Volume')
     weight = models.FloatField(verbose_name='Peso')
+    height = models.FloatField(blank=True, default=0.00, verbose_name='Altura')
+    width = models.FloatField(blank=True, default=0.00, verbose_name='Largura')
+    depth = models.FloatField(blank=True, default=0.00, verbose_name='Profundidade')
+
+    class Meta:
+        db_table = 'icity_products'
+        verbose_name_plural = 'Produtos'
+
+    def __str__(self):
+        return f'{self.pk_products} - {self.dsc_prod}'
+
+
+class ProductsSimilar(models.Model):
+    pk_products_similar = models.CharField(max_length=13, primary_key=True, verbose_name='Código de Barras')
+    fk_products = models.ForeignKey(Products, on_delete=models.CASCADE, verbose_name='Código')
+    street = models.CharField(max_length=3, verbose_name='Rua')
+    tower = models.CharField(max_length=5, verbose_name='Predio')
+    level = models.CharField(max_length=3, verbose_name='Nivel')
+    position = models.CharField(max_length=5, verbose_name='Posicao')
     unity = models.CharField(max_length=5, verbose_name='Unidade')
     qtd_unity = models.FloatField(verbose_name='QUant. da Unidade')
     image_prod = models.TextField(blank=True, null=True, verbose_name='Imagem')     # Base64 decoded image (text)
 
     class Meta:
-        db_table = 'products'
-        verbose_name_plural = 'Produtos'
+        db_table = 'icity_products_similarity'
+        verbose_name_plural = 'Produtos Similares'
+
+    def __str__(self):
+        return f'{self.fk_products} - {self.pk_products_similar}'
 
 
-class CarriersCars(models.Model):
+class Carriers(models.Model):
     """
     Table that store all collects to do on 1 car
     """
-    SIDE_OPTIONS = [
-        ('E', 'Esquerda'),
-        ('D', 'Direita'),
-    ]
     STATUS_OPTIONS = [
         ('L', 'Livre'),
         ('P', 'Processando'),
         ('S', 'Em Separação'),
         ('C', 'Em Conferência'),
     ]
-    # hash contendo o usuário, o carro, a carga, o pedido, e o box
-    pk_carriers_cars = models.CharField(max_length=64, primary_key=True, verbose_name='Usuario/Carga')
-    fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
-    fk_cars_boxes = models.ForeignKey(CarsBoxes, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Box')
+    # hash contendo carga, lote e cliente,
+    pk_carriers = models.CharField(max_length=64, primary_key=True, verbose_name='Código Pedido')
     fk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
-    fk_products = models.ForeignKey(CarriersProducts, on_delete=models.PROTECT, verbose_name='Produto')
     charge = models.IntegerField(verbose_name='Num. Carga')
     lot = models.IntegerField(verbose_name='Num Lote')
-    street = models.CharField(max_length=3, verbose_name='Rua')
-    tower = models.CharField(max_length=5, verbose_name='Predio')
-    level = models.CharField(max_length=3, verbose_name='Nivel')
-    position = models.CharField(max_length=5, verbose_name='Posicao')
-    stock = models.FloatField(verbose_name='Estoque Atual')
-    qtd_packing = models.FloatField(verbose_name='Quant. da Embalagem')
-    qtd_order = models.FloatField(verbose_name='Quant. do Pedido')
-    qtd_collected = models.FloatField(verbose_name='Quant. Coletada')
-    unity = models.CharField(max_length=2, verbose_name='UN')
     weight = models.FloatField(verbose_name='Peso')
     volume = models.FloatField(verbose_name='Volume m3')
-    weight_box = models.FloatField(verbose_name='Peso do Box')
-    volume_box = models.FloatField(verbose_name='Volume do Box')
-    side = models.CharField(
-        max_length=1, choices=SIDE_OPTIONS, default='E', verbose_name='Lado'
-    )
     flag_status = models.CharField(
         max_length=1, choices=STATUS_OPTIONS, default='L', verbose_name='Status')
     flag_ready = models.SmallIntegerField(default=0, verbose_name='Carregado')
@@ -177,6 +186,68 @@ class CarriersCars(models.Model):
     insert_date = models.DateTimeField(auto_now=True, verbose_name='Data de Insercao')
 
     class Meta:
-        db_table = 'carrier_products'
-        verbose_name_plural = 'Carga Produtos'
+        db_table = 'icity_carriers'
+        verbose_name_plural = 'Pedidos'
 
+    def __str__(self):
+        return f'carga:{self.charge} lote:{self.lot} cliente:{self.fk_customer}'
+
+
+class CarriersProducts(models.Model):
+    SIDE_OPTIONS = [
+        ('E', 'Esquerda'),
+        ('D', 'Direita'),
+    ]
+    # has contendo fk_carriers, fk_products, street e tower
+    pk_carriers_products = models.CharField(
+        max_length=64, primary_key=True, verbose_name='Produtos do Pedido'
+    )
+    fk_carriers = models.ForeignKey(
+        Carriers, default='', on_delete=models.PROTECT, verbose_name='Pedido'
+    )
+    fk_products = models.ForeignKey(
+        Products, default='', on_delete=models.PROTECT, verbose_name='Produto'
+    )
+    fk_products_similar = models.ForeignKey(
+        ProductsSimilar, on_delete=models.PROTECT,
+        null=True, blank=True, max_length=13, verbose_name='Código de Barras'
+    )
+    street = models.CharField(default='', max_length=3, verbose_name='Rua')
+    tower = models.CharField(default='', max_length=5, verbose_name='Predio')
+    level = models.CharField(max_length=3, default=1, verbose_name='Nivel')
+    position = models.CharField(max_length=5, default=0, verbose_name='Posicao')
+    qtd_packing = models.FloatField(default=0.00, verbose_name='Quant. da Embalagem')
+    qtd_order = models.FloatField(default=0.00, verbose_name='Quant. do Pedido')
+    qtd_collected = models.FloatField(default=0.00, verbose_name='Quant. Coletada')
+    unity = models.CharField(default='', max_length=2, verbose_name='UN')
+    stock = models.FloatField(default=0.00, verbose_name='Estoque Atual')
+    weight = models.FloatField(default=0.00, verbose_name='Peso')
+    volume = models.FloatField(default=0.00, verbose_name='Volume m3')
+    side = models.CharField(
+        max_length=1, choices=SIDE_OPTIONS, default='E', verbose_name='Lado'
+    )
+
+    class Meta:
+        db_table = 'icity_carriers_products'
+        verbose_name_plural = 'Produtos dos Pedidos'
+
+    def __str__(self):
+        return f'carga:{self.fk_carriers} Produto:{self.fk_products}'
+
+
+class CarriersBoxes(models.Model):
+    # has contendo pk_carriers_products, fk_users e fk_cars_boxes
+    pk_carriers_boxes = models.CharField(max_length=64, primary_key=True, verbose_name='Box do Prod. Pedido')
+    fk_carriers_products = models.ForeignKey(CarriersProducts, on_delete=models.PROTECT, verbose_name='Carga')
+    fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
+    fk_cars_boxes = models.ForeignKey(CarsBoxes, on_delete=models.PROTECT, verbose_name='Box')
+    fk_users = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Operador')
+    weight = models.FloatField(verbose_name='Peso')
+    volume = models.FloatField(verbose_name='Volume m3')
+
+    class Meta:
+        db_table = 'icity_carriers_boxes'
+        verbose_name_plural = 'Boxes dos Pedidos'
+
+    def __str__(self):
+        return f'carga:{self.fk_carriers_products} Box:{self.fk_cars_boxes} operador:{self.fk_users}'

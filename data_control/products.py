@@ -60,20 +60,6 @@ class Consinco2Plataform:
         data.save()
         return data
 
-    @staticmethod
-    def create_data_frame(self):
-        charges_list = []
-        carriers = Carriers.objects.filter(flag_status='L')
-        for carrier in carriers:
-            carriers_products = CarriersProducts.objects.filter(fk_carriers=carrier.pk_carriers)
-
-            charges_dict = C_map.queryset_to_dict(carrier)   # create a dict from carrier
-            for carrier_product in carriers_products:
-                charges_dict.update(C_map.queryset_to_dict(carrier_product))
-                charges_list.append(charges_dict)
-
-        return pd.DataFrame(charges_list)
-
     def _save_charge_products(self) -> bool:
         self.df = self.df[self.df['tipseparacao'].isin(self.FRACTIONED_PRODUCTS)]
         res = apps.result_dict()
@@ -295,6 +281,21 @@ class ProductDataControl:
     pk_last_charge = 0
     date_last_charge = 0
 
+    @staticmethod
+    def create_data_frame():
+        charges_list = []
+        carriers = Carriers.objects.filter(flag_status='L')
+        for carrier in carriers:
+            carriers_products = CarriersProducts.objects.filter(fk_carriers=carrier.pk_carriers)
+
+            charges_dict = C_map.queryset_to_dict(carrier)   # create a dict from carrier
+            for carrier_product in carriers_products:
+                charges_dict.update(C_map.queryset_to_dict(carrier_product))
+                charges_list.append(charges_dict)
+
+        return pd.DataFrame(charges_list)
+
+
     def _load_boxes(self):
         first_pk = int(str(apps.CAR_ID) + str(10))
         last_pk = int(str(apps.CAR_ID) + str(26))
@@ -316,21 +317,22 @@ class ProductDataControl:
 
     def _calculate_fields(self):
         self.df['sytatus'] = 'L'
-        self.df['peso'] = round(self.df['qtdembsolcarga'] * self.df['pesobruto'], 6)
+        self.df['weight'] = round(self.df['qtd_packing'] * self.df['weight_item'], 6)
         vol_unit = self.df['altura'] * self.df['largura'] * self.df['profundidade'] / 1000000
         self.df['volume'] = round(self.df['qtdembsolcarga'] * vol_unit, 6)
         self.df['side'] = self.df.apply(lambda row: 'E' if (row['nropredio'] % 2) == 0 else 'D', axis=1)
         self.df['status'] = 'P'
 
 
-        self.df = None
         qry = Carriers.objects.all()
         self.df = pd.DataFrame(list(qry))
         self.df = self.df.sort_values(self.SEPARATION_SORT)
 
     def _filter_user_product(self):
+        self.df = self.create_data_frame()      # Create a DataFram from plataform database
+
         res = apps.result_dict()
-        permissions = UsersOperatorsPermissions.objects.filter(pk__startswith=apps.USER_NAME)
+        permissions = UsersOperatorsPermissions.objects.filter(pk__startswith=apps.USER_NAME)   # Get all users permissions
         for perm in permissions:
             if perm.flag_status == 'A':
                 self.USER_PERMISSIONS.append(perm.type_line)
@@ -338,16 +340,19 @@ class ProductDataControl:
             res['status']['sttCode'] = 404
             res['status']['sttMsgs'] = 'Usuário não possui ativaidades'
             return res
-        self.df = self.df[self.df['tipseparacao'].isin(self.USER_PERMISSIONS)]
+
+        self.df = self.df[self.df['flag_type_line'].isin(self.USER_PERMISSIONS)]    # Filter users permissions from data
         sp = self.df.shape
         if sp[0] < 1:
             res['status']['sttCode'] = 404
             res['status']['sttMsgs'] = 'Usuário não possui atividades nas cargas selecionadas'
             return res
-        res = self._calculate_fields()
+
+        res = self._calculate_fields()      # Calc all Fields to store into database and mount orders into car boxes
         if res['status']['sttCode'] != 200:
             return res
-        if not self._load_boxes():
+
+        if not self._load_boxes():      # Load Boxes from CAR_ID to mount orders into car boxes
             res['status']['sttCode'] = 500
             res['status']['sttMsgs'] = 'Não foi possível carregar os pedidos nas caçambas!'
         return res
@@ -472,6 +477,10 @@ class ProductDataControl:
             res, flag_filter = self._filter_user_product()
             if res['status']['sttCode'] != 200:
                 return res
+
+
+
+
             res = self._set_boxes_charge()
             if flag_filter == 0:
                 res['status']['sttCode'] = 500

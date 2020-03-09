@@ -209,8 +209,8 @@ class Carriers(models.Model):
     fk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
     charge = models.IntegerField(verbose_name='Num. Carga')
     lot = models.IntegerField(verbose_name='Num Lote')
-    weight = models.FloatField(verbose_name='Peso')
-    volume = models.FloatField(verbose_name='Volume')
+    weight_charge = models.FloatField(verbose_name='Peso')
+    volume_charge = models.FloatField(verbose_name='Volume')
     flag_type_line = models.CharField(
         max_length=2, default='FG', choices=TYPE_LINE_OPTIONS, verbose_name='Tipo Separação'
     )
@@ -256,8 +256,8 @@ class CarriersProducts(models.Model):
     qtd_collected = models.FloatField(default=0.00, verbose_name='Quant. Coletada')
     unity = models.CharField(default='', max_length=2, verbose_name='UN')
     stock = models.FloatField(default=0.00, verbose_name='Estoque Atual')
-    weight = models.FloatField(default=0.00, verbose_name='Peso')
-    volume = models.FloatField(default=0.00, verbose_name='Volume m3')
+    weight_prod = models.FloatField(default=0.00, verbose_name='Peso')
+    volume_prod = models.FloatField(default=0.00, verbose_name='Volume')
     side = models.CharField(
         max_length=1, choices=SIDE_OPTIONS, default='E', verbose_name='Lado'
     )
@@ -277,8 +277,8 @@ class CarriersBoxes(models.Model):
     fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
     fk_cars_boxes = models.ForeignKey(CarsBoxes, on_delete=models.PROTECT, verbose_name='Box')
     fk_users = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Operador')
-    weight = models.FloatField(verbose_name='Peso')
-    volume = models.FloatField(verbose_name='Volume m3')
+    weight_box = models.FloatField(verbose_name='Peso')
+    volume_box = models.FloatField(verbose_name='Volume m3')
 
     class Meta:
         db_table = 'icity_carriers_boxes'

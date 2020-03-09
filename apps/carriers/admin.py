@@ -20,7 +20,7 @@ class LastChargeAdmin(admin.ModelAdmin):
 
 class CarriersAdmin(admin.ModelAdmin):
     list_display = (
-        'charge', 'lot', 'fk_customer', 'weight', 'volume'
+        'charge', 'lot', 'fk_customer', 'weight_charge', 'volume_charge'
     )
 
 

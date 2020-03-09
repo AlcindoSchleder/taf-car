@@ -2,6 +2,7 @@
 import requests
 import json
 import apps
+from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from urllib.parse import urlparse
@@ -79,3 +80,21 @@ class HomePageView(TemplateView):
         if apps.CAR_PREPARED and request.user.is_authenticated:
             return redirect(apps.get_redirect_url('carriers:carriers', params=params))
         return render(request, self.template_name, params)
+
+
+class HomeTestsView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+
+        def as_dict(qs):
+            return [item for item in qs]
+        template = """
+        <h1>Teste de Operações</h1>
+        """
+        test_dict = {}
+        boxes = CarsBoxes.objects.values()
+        # test_dict.update()
+        test_str = as_dict(boxes)
+        template += \
+            '<div> dict: </div> <div> ' + str(test_str) + ' </div>'
+        return HttpResponse(template)

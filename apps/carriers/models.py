@@ -5,6 +5,21 @@ from django.contrib.auth.models import User
 
 
 class CargasProdutos(models.Model):
+    TYPE_LINE_OPTIONS = [
+        ('AG', 'Alimetício Grandeza'),
+        ('BF', 'Fardarias Grandeza'),
+        ('BG', 'Bebidas Grandeza'),
+        ('CO', 'Confinado'),
+        ('FA', 'Fracionado Alimento'),
+        ('FB', 'Fracionado Bebidas'),
+        ('FF', 'Leveza Papel Higiênico'),
+        ('FG', 'Fracionado Gerais'),
+        ('FL', 'Leveza Fardaria Grandeza'),
+        ('LA', 'Licitação Alimento'),
+        ('LF', 'Limpeza Fracionada'),
+        ('LG', 'Limpeza Grandeza'),
+        ('LL', 'Leveza Limpeza Grandeza'),
+    ]
     FLAG_TYPE_ADDRESS = [
         ('A', 'Grandeza'),
         ('M', 'Miudeza'),
@@ -79,7 +94,9 @@ class CargasProdutos(models.Model):
     grauprioridade = models.IntegerField(verbose_name='Prioridade')
     statusrf = models.CharField(max_length=1, null=True, blank=True, verbose_name='Status RF')
     statusatividade = models.CharField(max_length=1, choices=FLAG_STATUS_ACTIVITY, verbose_name='Status da Atividade')
-    tipseparacao = models.CharField(max_length=2, null=True, blank=True, verbose_name='Tipo Serpação')
+    tipseparacao = models.CharField(
+        max_length=2, null=True, blank=True, choices=TYPE_LINE_OPTIONS, verbose_name='Tipo Serpação'
+    )
     tiplote = models.CharField(max_length=2, null=True, blank=True, verbose_name='Tipo Lote')
     pesototallote = models.FloatField(default=0.00, verbose_name='Peso Lote')
     mcubtotallote = models.FloatField(default=0.00, verbose_name='Cubagem Lote')
@@ -172,13 +189,31 @@ class Carriers(models.Model):
         ('S', 'Em Separação'),
         ('C', 'Em Conferência'),
     ]
-    # hash contendo carga, lote e cliente,
+    TYPE_LINE_OPTIONS = [
+        ('AG', 'Alimetício Grandeza'),
+        ('BF', 'Fardarias Grandeza'),
+        ('BG', 'Bebidas Grandeza'),
+        ('CO', 'Confinado'),
+        ('FA', 'Fracionado Alimento'),
+        ('FB', 'Fracionado Bebidas'),
+        ('FF', 'Leveza Papel Higiênico'),
+        ('FG', 'Fracionado Gerais'),
+        ('FL', 'Leveza Fardaria Grandeza'),
+        ('LA', 'Licitação Alimento'),
+        ('LF', 'Limpeza Fracionada'),
+        ('LG', 'Limpeza Grandeza'),
+        ('LL', 'Leveza Limpeza Grandeza'),
+    ]
+    # hash(charge, lot and fk_customers)
     pk_carriers = models.CharField(max_length=64, primary_key=True, verbose_name='Código Pedido')
     fk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
     charge = models.IntegerField(verbose_name='Num. Carga')
     lot = models.IntegerField(verbose_name='Num Lote')
     weight = models.FloatField(verbose_name='Peso')
-    volume = models.FloatField(verbose_name='Volume m3')
+    volume = models.FloatField(verbose_name='Volume')
+    flag_type_line = models.CharField(
+        max_length=2, default='FG', choices=TYPE_LINE_OPTIONS, verbose_name='Tipo Separação'
+    )
     flag_status = models.CharField(
         max_length=1, choices=STATUS_OPTIONS, default='L', verbose_name='Status')
     flag_ready = models.SmallIntegerField(default=0, verbose_name='Carregado')
@@ -198,7 +233,7 @@ class CarriersProducts(models.Model):
         ('E', 'Esquerda'),
         ('D', 'Direita'),
     ]
-    # has contendo fk_carriers, fk_products, street e tower
+    # hash(fk_carriers, fk_products, street and tower)
     pk_carriers_products = models.CharField(
         max_length=64, primary_key=True, verbose_name='Produtos do Pedido'
     )

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import requests
-import json
 import datetime
 import hashlib
 import apps
@@ -10,78 +8,82 @@ from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from contrib.check import CheckHost
-from apps.carriers.models import CarriersProducts, LastCharge, Carriers
+from data_control.fields import ConsincoMapping as C_map
+from data_control.api import ApiHostAccess
 from apps.login.models import UsersOperatorsPermissions
 from apps.home.models import Cars, CarsBoxes
+from apps.carriers.models import (
+    Products, ProductsSimilar, CargasProdutos, LastCharge,
+    Carriers, CarriersProducts, CarriersBoxes
+)
 
 
-class ProductDataControl:
-
-    API_FIELDS = [
-        'seqproduto', 'desccompleta', 'descreduzida', 'codrua',
-        'nropredio', 'nroapartamento', 'nrosala', 'especieendereco',
-        'indterreoaereo', 'qtdatual', 'statusendereco', 'tipespecie',
-        'nroempresa', 'nrocarga', 'coddepossepar', 'destino', 'tipentrega',
-        'pesototal', 'mcubtotal', 'nrobox', 'statuscarga',
-        'valorcarga', 'seqlote', 'qtdcontada', 'seqatividade',
-        'codtipatividade', 'nroquebra', 'mesano', 'peso', 'metragemcubica',
-        'qtdvolume', 'qtditem', 'indexclusao', 'grauprioridade', 'statusrf',
-        'statusatividade', 'tipseparacao', 'tiplote', 'pesototallote',
-        'mcubtotallote', 'qtdvolumelote', 'qtditemlote',
-        'seqordenacaoseparacao', 'seqpessoa', 'qtdembcarga', 'qtdembsolcarga',
-        'qtdembsepcarga', 'nropedvenda', 'embalagem', 'pesobruto',
-        'pesoliquido', 'altura', 'largura', 'profundidade', 'status',
-    ]
-    END_POINTS = {
-        'all_products': '/tafApi/product/1.0/{p1}',
-        'fractional_products': '/tafApi/product/1.0/fractional/{p1}',
-        'greatness_products': '/tafApi/product/1.0/greatness/{p1}',
-        'product': '/tafApi/product/1.0/%d',
-        'product-image': '/tafAPI/product/1.0/pk/%s'
-    }
-    FILTER_PROD = [
-        'seqproduto', 'desccompleta', 'qtdatual', 'qtdembcarga', 'qtdembsolcarga',
-        'qtdembsepcarga', 'seqpessoa', 'embalagem', 'pesobruto', 'pesoliquido',
-        'altura', 'largura', 'profundidade', 'codrua', 'nropredio', 'nroapartamento',
-        'especieendereco', 'indterreoaereo', 'statusendereco', 'tipespecie',
-        'nrocarga', 'tiplote', 'nrosala', 'seqlote', 'tipseparacao',
-    ]
-
-    COLLECT_SORT = [
-        'tipseparacao',
-        'nrocarga',
-        'seqpessoa',
-        'seqproduto',
-    ]
-
-    SEPARATION_SORT = [
-        'street', 'tower', 'charge',
-        'lot', 'pk_customer', 'level', 'position',
-    ]
-
+class Consinco2Plataform:
     FRACTIONED_PRODUCTS = ['FR', 'FL', 'CO', 'FA', 'FG']
-    CAR_BOXES = []
-    USER_PERMISSIONS = []
-    _PROTO = 'http'
-    _PORT = 5180
-    _TIMEOUT = 3.5
-    result = apps.RESULT_DICT
-    url = None
+
     df = None
-    df_original = None
-    host = None
-    pk_last_charge = 0
-    date_last_charge = 0
+
+    @staticmethod
+    def get_products_from_api(api_name: str = 'all_products', **params):
+        params = {} if params is None else params
+        try:
+            last_charge = LastCharge.objects.get()
+            pk_last_charge = last_charge.pk_last_charge
+        except ObjectDoesNotExist:
+            pk_last_charge = 0
+        params['p1'] = pk_last_charge
+        api = ApiHostAccess()
+        return api.get_data(api_name, params=params)
+
+    @staticmethod
+    def _create_hash_from_fields(**fields):
+        pk = ''
+        for field in fields:
+            pk += str(fields[field]) + '-'
+        if pk[-1] == '-':
+            pk[-1] = ''
+        hash_object = hashlib.sha256(pk.encode())
+        return hash_object.hexdigest()
+
+    @staticmethod
+    def _convert_product(row):
+        data = {}
+        with C_map.PRODUCTS_MAP as fields:
+            for f in fields:
+                if f in row.keys():
+                    data[fields[f]] = row[f]
+        return data
+
+    @staticmethod
+    def _save_df(row, table):
+        data = table(**row)
+        data.save()
+        return data
+
+    @staticmethod
+    def create_data_frame(self):
+        charges_list = []
+        carriers = Carriers.objects.filter(flag_status='L')
+        for carrier in carriers:
+            carriers_products = CarriersProducts.objects.filter(fk_carriers=carrier.pk_carriers)
+
+            charges_dict = C_map.queryset_to_dict(carrier)   # create a dict from carrier
+            for carrier_product in carriers_products:
+                charges_dict.update(C_map.queryset_to_dict(carrier_product))
+                charges_list.append(charges_dict)
+
+        return pd.DataFrame(charges_list)
 
     def _save_charge_products(self) -> bool:
+        self.df = self.df[self.df['tipseparacao'].isin(self.FRACTIONED_PRODUCTS)]
         res = apps.result_dict()
         try:
             data = None
-            for index, row in self.df_original.iterrows():
-                data = CarriersProducts(**row)
+            for index, row in self.df.iterrows():
+                data = CargasProdutos(**row)
                 data.save()
             reg = LastCharge(
+                fk_cargas_produtos=data,
                 pk_last_charge=data.nrocarga,
                 date_last_charge=datetime.now(tz=timezone.utc)
             )
@@ -92,55 +94,21 @@ class ProductDataControl:
             return res
         return res
 
-    def _get_products_from_api(self, api_name: str = 'all_products', **params):
-        if params is None:
-            params = {}
-        res = apps.result_dict()
-        try:
-            last_charge = LastCharge.objects.get()
-            pk_last_charge = last_charge.pk_last_charge
-        except ObjectDoesNotExist:
-            pk_last_charge = 0
-        check = CheckHost()
-        self.host = check.check_hosts()
-        if not self.host and api_name not in self.END_POINTS.keys():
-            res['status']['sttCode'] = 404
-            res['status']['sttMsgs'] = f'Error: API Host or API name {api_name} not found!'
-            return res
-        params['p1'] = pk_last_charge
-        end_point = self.END_POINTS[api_name].format(**params) \
-            if len(params) > 0 and self.END_POINTS[api_name].find('{') > -1 \
-            else self.END_POINTS[api_name]
-
-        self.url = f'{self._PROTO}://{self.host}:{self._PORT}{end_point}'    # mount URL
-        res['url'] = self.url
-
-        headers = {'Content-Type': 'application/json'}
-        try:
-            response = requests.get(self.url, headers=headers)  # Call API with parameters on url
-            res['status']['sttCode'] = response.status_code
-            res['data'] = json.loads(response.content.decode('utf-8'))
-        except Exception as e:
-            res['status']['sttCode'] = 404
-            res['status']['sttMsgs'] = \
-                f'Error on API {api_name} ({self.url}) to load products from ERP: [{e}]'
-        return res
-
     def _test_data_frame_fields(self, flag_from_data: bool):
-        index = self.df_original.shape
+        index = self.df.shape
         if (flag_from_data == 2) or (flag_from_data == 3):
-            if index[1] >= len(self.API_FIELDS):
-                for field in self.API_FIELDS:
-                    flag = field in self.df_original.columns
+            if index[1] >= len(C_map.API_FIELDS):
+                for field in C_map.API_FIELDS:
+                    flag = field in self.df.columns
                     if not flag:
                         return False
             else:
                 return False
         else:
             return False
-        self.df_original = self.df_original[self.API_FIELDS]
-        # self.df_original.fillna(value=0, inplace=True)
-        row = self.df_original.iloc[index[0] - 1]
+        self.df = self.df[C_map.API_FIELDS]
+
+        row = self.df.iloc[index[0] - 1]
         pk_charge = row['nrocarga']
         try:
             res = CarriersProducts.objects.filter(nrocarga=pk_charge).count() == 0
@@ -148,14 +116,141 @@ class ProductDataControl:
             res = True
         return res
 
-    def _get_products_data_frame(self):
+    def _convert_products_similar(self, row):
+        param = row.copy()
+        res = self.get_products_from_api('product-image', pk_product=param['seqproduto'])
+        if len(res['data']) > 0:
+            product = res['data']
+            for idx in product:
+                if idx not in param.keys():
+                    param[idx] = product[idx]
+        data = {}
+        with C_map.PRODUCTS_SIMILAR_MAP as fields:
+            for f in fields:
+                if f in param.keys():
+                    data[fields[f]] = param[f]
+        data['weight'] = data['qtd_unit'] * param['pesobruto']
+        volume = param['altura'] * param['largura'] * param['profundidade']
+        data['volume'] = data['qtd_unit'] * volume
+        return data
+
+    def _convert_carrier(self, row):
+        param = row.copy()
+        self._create_hash_from_fields(carga=row["nrocarga"])
+        # pk_carriers, lot, fk_customers
+        pk = self._create_hash_from_fields(
+            pk_carriers=row["nrocarga"],
+            lot=row["seqlote"],
+            fk_customer=row["seqpessoa"]
+        )
+        data = {
+            'pk_carriers': pk,
+
+        }
+        with C_map.CARRIERS_MAP as fields:
+            del fields['pk_carriers']
+            for f in fields:
+                if f in param.keys() and type(f) == 'str':
+                    data[fields[f]] = param[f]
+                else:
+                    data[f] = fields[f]
+        return data
+
+    def _convert_carrier_products(self, row, fk_products, fk_products_similar, fk_carrier):
+        param = row.copy()
+        self._create_hash_from_fields(carga=row["nrocarga"])
+        # pk_carriers, fk_products, street e tower
+        pk = self._create_hash_from_fields(
+            pk_carriers=row["nrocarga"],
+            fk_products=row["seqlote"],
+            street=row["seqpessoa"],
+            tower=row['nropredio']
+        )
+        data = {
+            'pk_carriers_products': pk,
+            'fk_carriers': fk_carrier,
+            'fk_products': fk_products,
+            'fk_products_similar': fk_products_similar,
+        }
+        with C_map.CARRIERS_PRODUCTS_MAP as fields:
+            del fields['pk_carriers_products']
+            del fields['fk_carriers']
+            del fields['seqproduto']
+            del fields['fk_products_similar']
+            for f in fields:
+                if f in param.keys() and type(f) == 'str':
+                    data[fields[f]] = param[f]
+                else:
+                    data[f] = fields[f]
+        return data
+
+    def _convert_carrier_boxes(self, row, pk_carriers_products):
+        param = row.copy()
+        self._create_hash_from_fields(carga=row["nrocarga"])
+        # pk_carriers_products, fk_users e fk_cars_boxes
+        pk = self._create_hash_from_fields(
+            pk_carriers=row["nrocarga"],
+            fk_products=row["seqlote"],
+            street=row["seqpessoa"],
+            tower=row['nropredio']
+        )
+        data = {
+            'pk_carriers_products': pk,
+            'fk_users': str(apps.USER_NAME),
+            'fk_cars_boxes': str(apps.CAR_ID) + '___',
+        }
+        with C_map.CARRIERS_BOXES_MAP as fields:
+            del fields['pk_carriers_products']
+            del fields['fk_carriers']
+            del fields['seqproduto']
+            del fields['fk_products_similar']
+            for f in fields:
+                if f in param.keys() and type(f) == 'str':
+                    data[fields[f]] = param[f]
+                else:
+                    data[f] = fields[f]
+        return data
+    CARRIERS_BOXES_MAP = {
+        'pk_carriers_boxes': '',
+        'fk_carriers_products': 'carriers_products.pk_carriers_products',
+        'fk_cars': 'cars.pk_cars',
+        'fk_cars_boxes': 'cars_boxes.pk_cars_boxes',
+        'fk_users': 'user.id',
+        'weight': 0.00,
+        'volume': 0.00,
+    }
+
+    def _convert_consinco_to_plataform(self):
+        res = apps.result_dict()
+        try:
+            for index, row in self.df.iterrows():
+                product = self._save_df(self._convert_product(row), Products)
+                product_similar = self._save_df(self._convert_products_similar(row), ProductsSimilar)
+                carrier = self._save_df(self._convert_carrier(row), Carriers)
+                carrier_product = self._save_df(
+                    self._convert_carrier_products(row, product, product_similar, carrier),
+                    CarriersProducts,
+                )
+                carrier_boxes = self._save_df(
+                    self._convert_carrier_boxes(row, carrier_product.pk_carriers_products),
+                    CarriersBoxes
+                )
+        except Exception as e:
+            res['status']['sttCode'] = 500
+            res['status']['sttMsgs'] = f'Erro ao gravar os cargas da plataforma! - ({e})'
+        if res['status']['sttCode'] != 200:
+            return res
+        df = self.create_data_frame()
+        return res, df
+
+    def get_products_data_frame(self):
         res = apps.result_dict()
         carriers = Carriers.objects.filter(fk_cars_id=apps.CAR_ID, flag_status='L')
         if carriers.count() > 0:
             pd.DataFrame(list(carriers))
             res['status']['from_data'] = 1
         else:
-            res = self._get_products_from_api()
+            res = self.get_products_from_api('all_products')
             if res['status']['sttCode'] == 200 and res['data'] is not None and len(res['data']['records']) > 0:
                 self.df = pd.DataFrame(res['data']['records'])
                 res['status']['from_data'] = 2
@@ -167,9 +262,8 @@ class ProductDataControl:
         if self.df is None:
             res['status']['sttCode'] = 500
             res['status']['sttMsgs'] = 'Error: None data found to Data Frame!'
-            return res
+            return res, None
         self.df['status'] = 'L'
-        self.df_original = self.df.copy()
         """
         res['status']['from_data']:
         1: banco de dados classificado
@@ -178,9 +272,28 @@ class ProductDataControl:
         """
 
         if self._test_data_frame_fields(res['status']['from_data']):
-            self._save_charge_products()
-        res['data'] = []
-        return res
+            res = self._save_charge_products()
+        if res['status']['sttCode'] != 200:
+            return res, None
+        if 'data' in res.keys():
+            res['data'] = []
+        self.df = self.df[C_map.FILTER_PROD]
+        res = self._convert_consinco_to_plataform()
+        return res, self.df
+
+
+class ProductDataControl:
+    CAR_BOXES = []
+    USER_PERMISSIONS = []
+    _PROTO = 'http'
+    _PORT = 5180
+    _TIMEOUT = 3.5
+    url = None
+    df = None
+    df_original = None
+    host = None
+    pk_last_charge = 0
+    date_last_charge = 0
 
     def _load_boxes(self):
         first_pk = int(str(apps.CAR_ID) + str(10))
@@ -208,19 +321,15 @@ class ProductDataControl:
         self.df['volume'] = round(self.df['qtdembsolcarga'] * vol_unit, 6)
         self.df['side'] = self.df.apply(lambda row: 'E' if (row['nropredio'] % 2) == 0 else 'D', axis=1)
         self.df['status'] = 'P'
-        res = self._save_carrier_charges()
-        if res['status']['sttCode'] != 200:
-            return res
+
+
         self.df = None
         qry = Carriers.objects.all()
         self.df = pd.DataFrame(list(qry))
         self.df = self.df.sort_values(self.SEPARATION_SORT)
-        return res
 
     def _filter_user_product(self):
         res = apps.result_dict()
-        self.df = self.df[self.FILTER_PROD]
-        self.df = self.df[self.df['tipseparacao'].isin(self.FRACTIONED_PRODUCTS)]
         permissions = UsersOperatorsPermissions.objects.filter(pk__startswith=apps.USER_NAME)
         for perm in permissions:
             if perm.flag_status == 'A':
@@ -256,61 +365,6 @@ class ProductDataControl:
                 'image_prod': product['imagem'],
             }
         return {}
-
-    def _get_iterrow(self, index, row):
-        pk = f'{apps.CAR_ID};{row["nrocarga"]};{row["seqpessoa"]};'
-        hash_object = hashlib.sha256(pk.encode())
-        pk = hash_object.hexdigest()
-        data = {
-            'products': [],
-            'charges': [],
-        }
-        res = self._get_product_data(row['seqproduto'])
-        if res:
-            data['products'].append(res)
-        data['carges'].append({
-            'pk_carriers_products': pk,
-            'fk_cars_id': apps.CAR_ID,
-            'fk_cars_boxes_id': None,
-            'charge': row['nrocarga'],
-            'lot': row['seqlote'],
-            'street': row['codrua'],
-            'tower': row['nropredio'],
-            'level': row['nroapartamento'],
-            'position': row['nrosala'],
-            'pk_product': row['seqproduto'],
-            'description': row['desccompleta'],
-            'stock': row['qtdatual'],
-            'qtd_packing': row['qtdembcarga'],
-            'qtd_order': row['qtdembsolcarga'],
-            'qtd_collected': 0.0,
-            'pk_customer': row['seqpessoa'],
-            'unity': row['embalagem'],
-            'weight': row['peso'],
-            'volume': row['volume'],
-            'side': row['side'],
-            'flag_status': row['status'],
-            'flag_ready': 0,
-            'flag_conference': 0,
-            'box_name': '',
-            'box_id': 0,
-            'weight_box': 0,
-            'volume_box': 0
-        })
-        return data
-
-    def _save_carrier_charges(self):
-        res = apps.result_dict()
-        for index, row in self.df.iterrows():
-            data = self._get_iterrow(index, row)
-            # Assumes the default UTF-8
-            try:
-                obj_data = Carriers(**data)
-                obj_data.save()
-            except Exception as e:
-                res['status']['sttCode'] = 500
-                res['status']['sttMsgs'] = f'Erro ao gravar os cargas da plataforma! - ({e})'
-        return res
 
     def _save_product_original(self, line, charge, order, product, status):
         prod = self.df_original[
@@ -406,26 +460,29 @@ class ProductDataControl:
             prev_charge = charge
             row_idx += 1
 
+    def _get_data_and_store_db(self):
+        with Consinco2Plataform as c2p:
+            res, self.df = c2p.get_products_data_frame()
+        return res
+
     @property
     def fractional_products(self):
-        self.result = self._get_products_data_frame()
-        if self.result['status']['sttCode'] == 200:
-            self.result = apps.result_dict()
-            flag_filter = self._filter_user_product()
+        res = self._get_data_and_store_db()
+        if res['status']['sttCode'] == 200:
+            res, flag_filter = self._filter_user_product()
+            if res['status']['sttCode'] != 200:
+                return res
+            res = self._set_boxes_charge()
             if flag_filter == 0:
-                self._set_boxes_charge()
-                self.result['status']['sttCode'] = 200
-                self.result['status']['sttMsgs'] = 'Operação realizada com sucesso'
-            else:
-                self.result['status']['sttCode'] = 500
+                res['status']['sttCode'] = 500
                 if flag_filter == -1:
-                    self.result['status']['sttMsgs'] = f'Usuário {apps.USER_NAME} não ainda não possui atividades!'
+                    res['status']['sttMsgs'] = f'Usuário {apps.USER_NAME} não ainda não possui atividades!'
                 elif flag_filter == -2:
-                    self.result['status']['sttMsgs'] = f'Erro: Nenhuma caçamba foi alocada para o carro: {apps.CAR_ID}'
+                    res['status']['sttMsgs'] = f'Erro: Nenhuma caçamba foi alocada para o carro: {apps.CAR_ID}'
                 else:
-                    self.result['status']['sttMsgs'] = 'Erro Desconhecido: Entre em contato com o suporte' + \
+                    res['status']['sttMsgs'] = 'Erro Desconhecido: Entre em contato com o suporte' + \
                                                        f' e informe o seguinte código: {apps.CAR_ID}-{flag_filter}'
-        return self.result
+        return res
 
     @property
     def product_data(self):

@@ -9,8 +9,9 @@ from .models import (
 
 class CargasProdutosAdmin(admin.ModelAdmin):
     list_display = (
-        'nrocarga', 'seqlote', 'seqpessoa', 'desccompleta', 'codrua', 'nropredio',
-        'embalagem', 'pesobruto', 'pesoliquido', 'altura', 'largura', 'profundidade', 'status'
+        'nrocarga', 'seqlote', 'seqpessoa', 'desccompleta', 'tipseparacao',
+        'codrua', 'nropredio', 'embalagem', 'pesobruto', 'pesoliquido',
+        'altura', 'largura', 'profundidade', 'status'
     )
 
 

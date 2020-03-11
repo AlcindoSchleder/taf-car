@@ -8,11 +8,9 @@ from contrib.check import CheckHost
 class ApiHostAccess:
 
     END_POINTS = {
-        'all_products': '/tafApi/product/1.0/{p1}',
-        'fractional_products': '/tafApi/product/1.0/fractional/{p1}',
-        'greatness_products': '/tafApi/product/1.0/greatness/{p1}',
-        'product': '/tafApi/product/1.0/{pk_product}',
-        'product-image': '/tafAPI/product/1.0/pk/{pk_product}'
+        'all_products': '/tafApi/product/1.0/{pk_charge}',
+        'product_barcode': '/tafApi/product/1.0/barcode/{barcode}',
+        'product_pk': '/tafApi/product/1.0/pk/{pk_product}'
     }
     proto = 'http'
     port = 5180
@@ -21,6 +19,12 @@ class ApiHostAccess:
         self.set_end_points(end_points)
 
     def get_data(self, api_name: str, **params) -> dict:
+        def check_params(api_url: str):
+            for param in params:
+                if api_url.find('{' + param + '}') < 0:
+                    return False
+            return True
+
         result = result_dict()
         if api_name not in self.END_POINTS:
             result['status']['sttCode'] = 404
@@ -34,7 +38,7 @@ class ApiHostAccess:
             return result
 
         end_point = self.END_POINTS[api_name].format(**params) \
-            if len(params) > 0 and self.END_POINTS[api_name].find('{') > -1 \
+            if len(params) > 0 and check_params(self.END_POINTS[api_name]) \
             else self.END_POINTS[api_name]
 
         url = f'{self.proto}://{host}:{self.port}{end_point}'    # mount URL

@@ -16,21 +16,19 @@ class ConsincoMapping:
         'seqordenacaoseparacao', 'seqpessoa', 'qtdembcarga', 'qtdembsolcarga',
         'qtdembsepcarga', 'nropedvenda', 'embalagem', 'pesobruto',
         'pesoliquido', 'altura', 'largura', 'profundidade', 'status',
+        'volume',
     ]
     FILTER_PROD = [
         'seqproduto', 'desccompleta', 'qtdatual', 'qtdembcarga', 'qtdembsolcarga',
         'qtdembsepcarga', 'seqpessoa', 'embalagem', 'pesobruto', 'pesoliquido',
         'altura', 'largura', 'profundidade', 'codrua', 'nropredio', 'nroapartamento',
         'especieendereco', 'indterreoaereo', 'statusendereco', 'tipespecie',
-        'nrocarga', 'tiplote', 'nrosala', 'seqlote', 'tipseparacao',
+        'nrocarga', 'tiplote', 'nrosala', 'seqlote', 'tipseparacao', 'volume',
+        'pesototallote', 'mcubtotallote'
     ]
     PRODUCTS_MAP = {
         'seqproduto': 'pk_products',
         'desccompleta': 'dsc_prod',
-        'pesobruto': 'weight',
-        'altura': 'height',
-        'largura': 'width',
-        'profundidade': 'depth',
     }
     PRODUCTS_SIMILAR_MAP = {
         'barcode': 'pk_products_similar',
@@ -39,28 +37,28 @@ class ConsincoMapping:
         'nropredio': 'tower',
         'nroapartamento': 'level',
         'nrosala': 'position',
-        'qtdembalagem': 'qtd_unit',
+        'qtdembalagem': 'qtd_unity',
         'embalagem': 'unity',
         'imagem': 'image_prod',
-        'weight': 0.00,
-        'volume': 0.00,
+        'pesobruto': 'weight',
+        'volume': 'volume',
+        'altura': 'height',
+        'largura': 'width',
+        'profundidade': 'depth',
     }
     CARRIERS_MAP = {
         'pk_carriers': '',
         'seqpessoa': 'fk_customer',
         'nrocarga': 'charge',
         'seqlote': 'lot',
-        'peso': 0.00,
-        'volume': 0.00,
-        'flag_status': 'L',
-        'flag_ready': 0,
-        'flag_conference': 0,
+        'pesototallote': 'weight_charge',
+        'mcubtotallote': 'volume_charge',
     }
     CARRIERS_PRODUCTS_MAP = {
         'pk_carriers_products': '',
-        'fk_carriers': 'carriers.pk_carriers',
-        'seqproduto': 'products.fk_products',
-        'fk_products_similar': 'products_similar.pk_products_similar',
+        'fk_carriers_id': 'carriers.pk_carriers',
+        'seqproduto_id': 'products.fk_products',
+        # 'fk_products_similar': 'products_similar.pk_products_similar',
         'codrua': 'street',
         'nropredio': 'tower',
         'nroapartamento': 'level',
@@ -70,18 +68,18 @@ class ConsincoMapping:
         'qtdembsepcarga': 'qtd_collected',
         'embalagem': 'unity',
         'qtdatual': 'stock',
-        'weight': 0.00,
-        'volume': 0.00,
+        'peso': 'weight_prod',
+        'volume': 'volume_prod',
         'side': 'side'
     }
     CARRIERS_BOXES_MAP = {
         'pk_carriers_boxes': '',
-        'fk_carriers_products': 'carriers_products.pk_carriers_products',
-        'fk_cars': 'cars.pk_cars',
-        'fk_cars_boxes': 'cars_boxes.pk_cars_boxes',
-        'fk_users': 'user.id',
-        'weight': 0.00,
-        'volume': 0.00,
+        'fk_carriers_products_id': 'carriers_products.pk_carriers_products',
+        'fk_cars_id': 'cars.pk_cars',
+        'fk_cars_boxes_id': 'cars_boxes.pk_cars_boxes',
+        'fk_users_id': 'user.id',
+        'weight_charge': 'peso',
+        'volume_charge': 'volume',
     }
     COLLECT_SORT = [
         'tipseparacao',
@@ -96,5 +94,5 @@ class ConsincoMapping:
     ]
 
     @staticmethod
-    def queryset_to_dict(self, qs):
+    def queryset_to_dict(qs):
         return [item for item in qs]

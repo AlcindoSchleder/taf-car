@@ -13,6 +13,7 @@ class CargasProdutos(models.Model):
         ('FA', 'Fracionado Alimento'),
         ('FB', 'Fracionado Bebidas'),
         ('FF', 'Leveza Papel Higiênico'),
+        ('FR', 'Fracionado Alimento'),
         ('FG', 'Fracionado Gerais'),
         ('FL', 'Leveza Fardaria Grandeza'),
         ('LA', 'Licitação Alimento'),
@@ -146,11 +147,12 @@ class LastCharge(models.Model):
 class Products(models.Model):
     pk_products = models.IntegerField(primary_key=True, verbose_name='Código')
     dsc_prod = models.CharField(max_length=50, verbose_name='Descrição')
-    volume = models.FloatField(verbose_name='Volume')
-    weight = models.FloatField(verbose_name='Peso')
-    height = models.FloatField(blank=True, default=0.00, verbose_name='Altura')
-    width = models.FloatField(blank=True, default=0.00, verbose_name='Largura')
-    depth = models.FloatField(blank=True, default=0.00, verbose_name='Profundidade')
+    insert_date = models.DateTimeField(
+        auto_now_add=True, verbose_name='Data Inclusão'
+    )
+    update_date = models.DateTimeField(
+        auto_now=True, null=True, blank=True, verbose_name='Data Atualização'
+    )
 
     class Meta:
         db_table = 'icity_products'
@@ -169,6 +171,11 @@ class ProductsSimilar(models.Model):
     position = models.CharField(max_length=5, verbose_name='Posicao')
     unity = models.CharField(max_length=5, verbose_name='Unidade')
     qtd_unity = models.FloatField(verbose_name='QUant. da Unidade')
+    volume = models.FloatField(verbose_name='Volume')
+    weight = models.FloatField(verbose_name='Peso')
+    height = models.FloatField(blank=True, default=0.00, verbose_name='Altura')
+    width = models.FloatField(blank=True, default=0.00, verbose_name='Largura')
+    depth = models.FloatField(blank=True, default=0.00, verbose_name='Profundidade')
     image_prod = models.TextField(blank=True, null=True, verbose_name='Imagem')     # Base64 decoded image (text)
 
     class Meta:
@@ -197,7 +204,8 @@ class Carriers(models.Model):
         ('FA', 'Fracionado Alimento'),
         ('FB', 'Fracionado Bebidas'),
         ('FF', 'Leveza Papel Higiênico'),
-        ('FG', 'Fracionado Gerais'),
+        ('FG', 'Fracionados Gerais'),
+        ('FR', 'Fracionado Geral'),
         ('FL', 'Leveza Fardaria Grandeza'),
         ('LA', 'Licitação Alimento'),
         ('LF', 'Limpeza Fracionada'),
@@ -209,8 +217,8 @@ class Carriers(models.Model):
     fk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
     charge = models.IntegerField(verbose_name='Num. Carga')
     lot = models.IntegerField(verbose_name='Num Lote')
-    weight_charge = models.FloatField(verbose_name='Peso')
-    volume_charge = models.FloatField(verbose_name='Volume')
+    weight_charge = models.FloatField(default=0.00, verbose_name='Peso')
+    volume_charge = models.FloatField(default=0.00, verbose_name='Volume')
     flag_type_line = models.CharField(
         max_length=2, default='FG', choices=TYPE_LINE_OPTIONS, verbose_name='Tipo Separação'
     )
@@ -218,7 +226,8 @@ class Carriers(models.Model):
         max_length=1, choices=STATUS_OPTIONS, default='L', verbose_name='Status')
     flag_ready = models.SmallIntegerField(default=0, verbose_name='Carregado')
     flag_conference = models.SmallIntegerField(default=0, verbose_name='Conferido')
-    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data de Insercao')
+    insert_date = models.DateTimeField(
+        auto_now_add=True, null=True, blank=True, verbose_name='Data de Insercao')
 
     class Meta:
         db_table = 'icity_carriers'

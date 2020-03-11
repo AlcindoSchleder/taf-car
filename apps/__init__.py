@@ -9,8 +9,9 @@ CAR_LEVELS = 2
 CAR_BOXES_LEVEL = 5
 CAR_BOXES = {}
 DATA_FRAME = None
+MAX_BOXES = 10          # máximo de caixas no carro
 BOX_MAX_WEIGHT = 30000  # peso máximo da caixa em gr
-BOX_MAX_VOLUME = 0.072  # volume máximo da caixa em m3
+BOX_MAX_VOLUME = 0.056  # volume máximo da caixa em m3
 VOLUME_PERCENT = 30     # percentual do volume para juntar 2 pedidos na mesma caixa
 
 USER_NAME = None

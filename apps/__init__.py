@@ -16,7 +16,7 @@ VOLUME_PERCENT = 30     # percentual do volume para juntar 2 pedidos na mesma ca
 
 USER_NAME = None
 USER_DATA = None
-USER_PERMISSIONS = ['FR', 'FL', 'CO']
+USER_PERMISSIONS = []
 
 # TODO: fix USER_PERMISSION to constant and not load when get user login
 #       FR -> Fracionados Gerais

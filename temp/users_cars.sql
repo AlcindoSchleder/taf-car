@@ -1,0 +1,12 @@
+BEGIN TRANSACTION;
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-AG','Alimentos Grandeza',6,'R','A','AG');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-BF','Fradaria Grandeza',6,'R','A','BF');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-BG','Bebidas Grandeza',6,'R','A','BG');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-LG','Limpeza Grandeza',6,'R','A','LG');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-FG','Fracionados Gerais',6,'R','A','FG');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-FL','Leveza Fardaria Grandeza',6,'R','A','FL');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-LF','Limpeza Fracionada',6,'R','A','LF');
+INSERT INTO "user_permissions" ("pk_user_permissions","dsc_line","fk_users_id","flag_separation","flag_status","type_line") VALUES ('942-FA','Fracionado Alimento',6,'R','A','FA');
+INSERT INTO "user_operators" ("fk_users_id","user_integration","flag_tuser","biometric_id","nroempresa","tipprodutivo","statusprodutivo","inddisponibilidade","horinijornada","horfimjornada","insert_date","fk_cars_id") VALUES (1,384,4,NULL,1,'F','A','S','15:00:00','12:00:00','2020-02-23 09:06:12.826268',1);
+INSERT INTO "user_operators" ("fk_users_id","user_integration","flag_tuser","biometric_id","nroempresa","tipprodutivo","statusprodutivo","inddisponibilidade","horinijornada","horfimjornada","insert_date","fk_cars_id") VALUES (6,942,4,NULL,1,'I','S','S','15:00:00','12:00:00','2020-03-06 18:29:52.042967',1);
+COMMIT;

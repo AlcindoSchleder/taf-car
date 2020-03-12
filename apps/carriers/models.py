@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.utils import timezone
+
 from apps.home.models import Cars, CarsBoxes
 from django.contrib.auth.models import User
 
@@ -116,8 +118,9 @@ class CargasProdutos(models.Model):
     altura = models.FloatField(default=0.00, verbose_name='Altura')
     largura = models.FloatField(default=0.00, verbose_name='Largura')
     profundidade = models.FloatField(default=0.00, verbose_name='Profundidade')
+    volume = models.FloatField(default=0.00, verbose_name='volume')
     status = models.CharField(max_length=1, default='L', verbose_name='Status')
-    insert_date = models.DateTimeField(auto_now=True, verbose_name='Data')
+    insert_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='Data')
 
     class Meta:
         db_table = 'consinco_cargas'
@@ -147,16 +150,18 @@ class LastCharge(models.Model):
 class Products(models.Model):
     pk_products = models.IntegerField(primary_key=True, verbose_name='Código')
     dsc_prod = models.CharField(max_length=50, verbose_name='Descrição')
-    insert_date = models.DateTimeField(
-        auto_now_add=True, verbose_name='Data Inclusão'
-    )
-    update_date = models.DateTimeField(
-        auto_now=True, null=True, blank=True, verbose_name='Data Atualização'
-    )
+    insert_date = models.DateTimeField(null=True, blank=True, verbose_name='Inserção')
+    update_date = models.DateTimeField(null=True, blank=True, verbose_name='Atualização')
 
     class Meta:
         db_table = 'icity_products'
         verbose_name_plural = 'Produtos'
+
+    def save(self, *args, **kwargs):
+        if not self.insert_date:
+            self.insert_date = timezone.now()
+        self.update_date = timezone.now()
+        return super(Products, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.pk_products} - {self.dsc_prod}'
@@ -170,20 +175,28 @@ class ProductsSimilar(models.Model):
     level = models.CharField(max_length=3, verbose_name='Nivel')
     position = models.CharField(max_length=5, verbose_name='Posicao')
     unity = models.CharField(max_length=5, verbose_name='Unidade')
-    qtd_unity = models.FloatField(verbose_name='QUant. da Unidade')
-    volume = models.FloatField(verbose_name='Volume')
-    weight = models.FloatField(verbose_name='Peso')
+    qtd_unity = models.FloatField(blank=True, default=0.00, verbose_name='QUant. da Unidade')
+    volume = models.FloatField(blank=True, default=0.00, verbose_name='Volume')
+    weight = models.FloatField(blank=True, default=0.00, verbose_name='Peso')
     height = models.FloatField(blank=True, default=0.00, verbose_name='Altura')
     width = models.FloatField(blank=True, default=0.00, verbose_name='Largura')
     depth = models.FloatField(blank=True, default=0.00, verbose_name='Profundidade')
     image_prod = models.TextField(blank=True, null=True, verbose_name='Imagem')     # Base64 decoded image (text)
+    insert_date = models.DateTimeField(null=True, blank=True, verbose_name='Inserção')
+    update_date = models.DateTimeField(null=True, blank=True, verbose_name='Atualização')
 
     class Meta:
         db_table = 'icity_products_similarity'
         verbose_name_plural = 'Produtos Similares'
 
+    def save(self, *args, **kwargs):
+        if not self.insert_date:
+            self.insert_date = timezone.now()
+        self.update_date = timezone.now()
+        return super(ProductsSimilar, self).save(*args, **kwargs)
+
     def __str__(self):
-        return f'{self.fk_products} - {self.pk_products_similar}'
+        return f'{self.street} - {self.tower} - {self.pk_products_similar}'
 
 
 class Carriers(models.Model):
@@ -217,8 +230,8 @@ class Carriers(models.Model):
     fk_customer = models.IntegerField(blank=True, default=0, verbose_name='Cod. Cliente')
     charge = models.IntegerField(verbose_name='Num. Carga')
     lot = models.IntegerField(verbose_name='Num Lote')
-    weight_charge = models.FloatField(default=0.00, verbose_name='Peso')
-    volume_charge = models.FloatField(default=0.00, verbose_name='Volume')
+    weight_charge = models.FloatField(verbose_name='Peso')
+    volume_charge = models.FloatField(verbose_name='Volume')
     flag_type_line = models.CharField(
         max_length=2, default='FG', choices=TYPE_LINE_OPTIONS, verbose_name='Tipo Separação'
     )
@@ -226,12 +239,18 @@ class Carriers(models.Model):
         max_length=1, choices=STATUS_OPTIONS, default='L', verbose_name='Status')
     flag_ready = models.SmallIntegerField(default=0, verbose_name='Carregado')
     flag_conference = models.SmallIntegerField(default=0, verbose_name='Conferido')
-    insert_date = models.DateTimeField(
-        auto_now_add=True, null=True, blank=True, verbose_name='Data de Insercao')
+    insert_date = models.DateTimeField(null=True, blank=True, verbose_name='Inserção')
+    update_date = models.DateTimeField(null=True, blank=True, verbose_name='Atualização')
 
     class Meta:
         db_table = 'icity_carriers'
         verbose_name_plural = 'Pedidos'
+
+    def save(self, *args, **kwargs):
+        if not self.insert_date:
+            self.insert_date = timezone.now()
+        self.update_date = timezone.now()
+        return super(Carriers, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'carga:{self.charge} lote:{self.lot} cliente:{self.fk_customer}'
@@ -242,9 +261,9 @@ class CarriersProducts(models.Model):
         ('E', 'Esquerda'),
         ('D', 'Direita'),
     ]
-    # hash(fk_carriers, fk_products, street and tower)
+    # hash(charge, fk_customers, fk_products, street and tower)
     pk_carriers_products = models.CharField(
-        max_length=64, primary_key=True, verbose_name='Produtos do Pedido'
+        max_length=64, default='', primary_key=True, verbose_name='Produtos do Pedido'
     )
     fk_carriers = models.ForeignKey(
         Carriers, default='', on_delete=models.PROTECT, verbose_name='Pedido'
@@ -259,7 +278,7 @@ class CarriersProducts(models.Model):
     street = models.CharField(default='', max_length=3, verbose_name='Rua')
     tower = models.CharField(default='', max_length=5, verbose_name='Predio')
     level = models.CharField(max_length=3, default=1, verbose_name='Nivel')
-    position = models.CharField(max_length=5, default=0, verbose_name='Posicao')
+    position = models.CharField(max_length=5, default='0', verbose_name='Posicao')
     qtd_packing = models.FloatField(default=0.00, verbose_name='Quant. da Embalagem')
     qtd_order = models.FloatField(default=0.00, verbose_name='Quant. do Pedido')
     qtd_collected = models.FloatField(default=0.00, verbose_name='Quant. Coletada')
@@ -270,10 +289,18 @@ class CarriersProducts(models.Model):
     side = models.CharField(
         max_length=1, choices=SIDE_OPTIONS, default='E', verbose_name='Lado'
     )
+    insert_date = models.DateTimeField(null=True, blank=True, verbose_name='Inserção')
+    update_date = models.DateTimeField(null=True, blank=True, verbose_name='Atualização')
 
     class Meta:
         db_table = 'icity_carriers_products'
         verbose_name_plural = 'Produtos dos Pedidos'
+
+    def save(self, *args, **kwargs):
+        if not self.insert_date:
+            self.insert_date = timezone.now()
+        self.update_date = timezone.now()
+        return super(CarriersProducts, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'carga:{self.fk_carriers} Produto:{self.fk_products}'
@@ -282,16 +309,26 @@ class CarriersProducts(models.Model):
 class CarriersBoxes(models.Model):
     # has contendo pk_carriers_products, fk_users e fk_cars_boxes
     pk_carriers_boxes = models.CharField(max_length=64, primary_key=True, verbose_name='Box do Prod. Pedido')
-    fk_carriers_products = models.ForeignKey(CarriersProducts, on_delete=models.PROTECT, verbose_name='Carga')
+    fk_carriers_products = models.ForeignKey(
+        CarriersProducts, default='', on_delete=models.PROTECT, verbose_name='Carga'
+    )
     fk_cars = models.ForeignKey(Cars, on_delete=models.PROTECT, verbose_name='Carro')
     fk_cars_boxes = models.ForeignKey(CarsBoxes, on_delete=models.PROTECT, verbose_name='Box')
     fk_users = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Operador')
     weight_box = models.FloatField(verbose_name='Peso')
     volume_box = models.FloatField(verbose_name='Volume m3')
+    insert_date = models.DateTimeField(null=True, blank=True, verbose_name='Inserção')
+    update_date = models.DateTimeField(null=True, blank=True, verbose_name='Atualização')
 
     class Meta:
         db_table = 'icity_carriers_boxes'
         verbose_name_plural = 'Boxes dos Pedidos'
+
+    def save(self, *args, **kwargs):
+        if not self.insert_date:
+            self.insert_date = timezone.now()
+        self.update_date = timezone.now()
+        return super(CarriersBoxes, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'carga:{self.fk_carriers_products} Box:{self.fk_cars_boxes} operador:{self.fk_users}'

@@ -18,7 +18,10 @@ class DisplayPageView(TemplateView):
         return car_id, display_id
 
     def get(self, request, *args, **kwargs):
-        car_id, display_id = self.validate_ids(request)
+        display_id = kwargs.get('display_id')
+        car_id, display = self.validate_ids(request)
+        display_id = display if display_id is None else display_id
+
         site_uri = urlparse(request.build_absolute_uri())
         host = f'{site_uri.scheme}://{site_uri.netloc}'
         request.session['display_id'] = display_id

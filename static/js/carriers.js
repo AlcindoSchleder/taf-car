@@ -17,7 +17,18 @@ var IndexEvents = function () {
         1: 'text-danger',
         2: 'text-success'
     }
-
+    var sockets = {
+        'e21': null,
+        'e22': null,
+        'e23': null,
+        'e24': null,
+        'e25': null,
+        'e11': null,
+        'e12': null,
+        'e13': null,
+        'e14': null,
+        'e15': null
+    }
     var car_id = $('.car_id').html();
 
     var checkCommands = function(e) {
@@ -27,12 +38,12 @@ var IndexEvents = function () {
     var getClientSocket = function(display_id) {
         var url = 'ws://' + window.location.host + '/ws/display/' + car_id + '/' + display_id +'/'
         console.log('Display socket connecting at: ', url);
-        var clientSocket = new WebSocket(url);
-        clientSocket.onmessage = checkCommands;
-        clientSocket.onclose = function(e) {
+
+        sockets[display_id] = new WebSocket(url);
+        sockets[display_id].onmessage = checkCommands;
+        sockets[display_id].onclose = function(e) {
             console.log('Display socket disconnecting from: ', url);
         };
-        return clientSocket;
     }
     var documentEvents = function () {
         $('#form_boxes input').on('keypress', function (e) {
@@ -53,35 +64,31 @@ var IndexEvents = function () {
         $('#form_boxes input').focusin(function (e) {
             let display_id = $(this).attr('name');
             let car_id = $('.car_id').html();
-            cliSocket = getClientSocket(display_id);
+            console.log('enter on: ', display_id);
+            if (sockets[display_id] == null)
+                console.log('criando socket para: ', display_id, );
+                getClientSocket(display_id);
             setTimeout(() => {
-                manageDisplay(cliSocket, 'control', car_id, display_id, 'display_enable');
-                setTimeout(() => {
-                    cliSocket.close();
-                }, 1000);
+                manageDisplay(sockets[display_id], 'control', car_id, display_id, 'display_enable');
             }, 1000);
         });
         $('#form_boxes input').focusout(function (e) {
             let display_id = $(this).attr('name');
             let value = $(this).val();
             let car_id = $('.car_id').html();
-            cliSocket = getClientSocket(display_id);
+            console.log('Enviando dados de: ', display_id, sockets);
+            manageDisplay(sockets[display_id], 'setbox', car_id, display_id, value);
             setTimeout(() => {
-                manageDisplay(cliSocket, 'setbox', car_id, display_id, value);
-                setTimeout(() => {
-                    manageDisplay(cliSocket, 'control', car_id, display_id, 'display_disable');
-                }, 1000);
-                setTimeout(() => {
-                    cliSocket.close();
-                }, 1000);
-            }, 1000)
+                console.log('Enviando dados de: ', display_id, sockets);
+                manageDisplay(sockets[display_id], 'control', car_id, display_id, 'display_disable');
+            }, 1000);
         });
 //        $('#e21').focus();
 //        $('#e21').select();
     };
     var manageDisplay = function (socket, command, car_id, display_id, message) {
-        socket.send(JSON.stringify({
-            'type': 'json',
+        console.log('Enviando/Recebendo dados de: ', display_id, sockets);
+        sockets[display_id].send(JSON.stringify({
             'command': command,
             'car_id': car_id,
             'display': display_id,

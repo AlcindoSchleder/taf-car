@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'apps.home',
     'apps.login',
     'apps.carriers',
@@ -74,7 +75,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'taf_car.wsgi.application'
-
+ASGI_APPLICATION = "myproject.routing.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('0.0.0.0', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

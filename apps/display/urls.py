@@ -5,6 +5,6 @@ from .views import DisplayPageView
 
 app_name = 'display'
 urlpatterns = [
-    path('', DisplayPageView.as_view(), name='display'),
-    path('<str:display_id>', DisplayPageView.as_view(), name='display'),
+    # path('', DisplayPageView.as_view(), name='display'),
+    path('<int:car_id>/<str:display_id>', DisplayPageView.as_view(), name='display'),
 ]

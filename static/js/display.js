@@ -12,14 +12,13 @@
 
 var IndexEvents = function () {
 
-    var display_id = "{{ display_id|escapejs }}";
+    var car_id = $('#car_id').val();
+    var display_id = $('#display_id').val();
 
     var documentEvents = function () {
-
-        var chatSocket = new WebSocket(
-            'ws://' + window.location.host +
-            '/ws/display/' + display_id + '/'
-        );
+        var url = 'ws://' + window.location.host + '/ws/display/' + car_id + '/' + display_id + '/'
+        console.log('creating a websocket to: ', url);
+        var chatSocket = new WebSocket(url);
 
         chatSocket.onmessage = checkCommands;
         chatSocket.onclose = function(e) {
@@ -28,12 +27,13 @@ var IndexEvents = function () {
     };
     var checkCommands = function(e) {
         let data_array = JSON.parse(e.data);
-        for (let i = 0; i < data_array.length; i++) {
-            if (data_array[i].box_type_command == 'control')
-                set_display_controls(data_array[i].box_message);
-            if (data_array[i].box_type_command == 'setbox')
-                $('.box_code').html(data_array[i].box_message);
-        };
+        console.log('received: ', data_array);
+//        for (let i = 0; i < data_array.length; i++) {
+//            if (data_array[i].box_type_command == 'control')
+//                console.log('comando de controle');group_id
+//            if (data_array[i].box_type_command == 'setbox')
+//                console.log('comando setbox');
+//        };
     }
     var set_display_controls = function (message) {
         if ((message == 'display_enable') && (!$('.shadow-page').hasClass('d-none')))

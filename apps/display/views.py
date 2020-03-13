@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 
 class DisplayPageView(TemplateView):
     template_name = 'display/display.html'
-    VALID_DISPLAY = ['e21', 'e22', 'e23', 'e24', 'e25', 'e11', 'e12', 'e13', 'e14', 'e15']
+    VALID_DISPLAY = ['e' + '21', 'e' + '22', 'e' + '23', 'e' + '24', 'e' + '25',
+                     'e' + '11', 'e' + '12', 'e' + '13', 'e' + '14', 'e' + '15']
 
     def validate_ids(self, request):
         car_id = int(request.GET.get('car_id'))
@@ -19,8 +20,11 @@ class DisplayPageView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         display_id = kwargs.get('display_id')
-        car_id, display = self.validate_ids(request)
-        display_id = display if display_id is None else display_id
+        car_id = kwargs.get('car_id')
+        # # car_id, display = self.validate_ids(request)
+        # display = 'e' + '21'
+        # car_id = 1
+        # display_id = display if display_id is None else display_id
 
         site_uri = urlparse(request.build_absolute_uri())
         host = f'{site_uri.scheme}://{site_uri.netloc}'

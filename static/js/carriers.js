@@ -58,8 +58,8 @@ var IndexEvents = function () {
                 manageDisplay(cliSocket, 'control', car_id, display_id, 'display_enable');
                 setTimeout(() => {
                     cliSocket.close();
-                }, 2000);
-            }, 2000);
+                }, 1000);
+            }, 1000);
         });
         $('#form_boxes input').focusout(function (e) {
             let display_id = $(this).attr('name');
@@ -68,11 +68,13 @@ var IndexEvents = function () {
             cliSocket = getClientSocket(display_id);
             setTimeout(() => {
                 manageDisplay(cliSocket, 'setbox', car_id, display_id, value);
-                manageDisplay(cliSocket, 'control', car_id, display_id, 'display_disable');
+                setTimeout(() => {
+                    manageDisplay(cliSocket, 'control', car_id, display_id, 'display_disable');
+                }, 1000);
                 setTimeout(() => {
                     cliSocket.close();
-                }, 2000);
-            }, 2000)
+                }, 1000);
+            }, 1000)
         });
 //        $('#e21').focus();
 //        $('#e21').select();

@@ -37,7 +37,7 @@ class CarriersPageView(TemplateView):
         if apps.CAR_COLLECT_PRODUCTS:
             self.pdc = ProductDataControl()
             apps.USER_NAME = request.user.username
-            response = self.pdc.fractional_products
+            response, self.df = self.pdc.load_boxes_from_operator()
             if response['status']['sttCode'] != 200:
                 self._reset_car()
                 logout(request)
@@ -45,7 +45,7 @@ class CarriersPageView(TemplateView):
                 message = response['status']['sttMsgs'] + ' - ' + response['url']
             else:
                 # TODO: Verificar o que vem em data para mostrar no render dos displays ou mensagens dos displays
-                data = self.pdc.product_data()
+                row = self.df
         else:
             apps.prepare_boxes()
         return {

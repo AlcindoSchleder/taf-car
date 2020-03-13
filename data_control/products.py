@@ -512,8 +512,6 @@ select icr.flag_type_line, icr.charge, icr.lot, icr.fk_customer,
  order by icr.flag_type_line, icr.charge, icr.lot, icr.fk_customer, ipr.pk_products
          """
         res = apps.result_dict()
-        # TODO: load first data into Data Frame
-        #       mount a charge into boxes
         try:
             cursor = connection.cursor()
             cursor.execute(products_query)
@@ -524,7 +522,7 @@ select icr.flag_type_line, icr.charge, icr.lot, icr.fk_customer,
             res['status']['sttCode'] = 500
             res['status']['sttMsgs'] = f'Erro ao ler o banco de dados: {e}'
         finally:
-            cursor.close();
+            cursor.close()
 
         if res['status']['sttCode'] != 200:
             return res, None

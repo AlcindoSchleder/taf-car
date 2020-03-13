@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class CarriersConsumer(AsyncWebsocketConsumer):
     display_id = ''
     car_id = ''
 

@@ -4,6 +4,8 @@ from .models import (
     CargasProdutos, LastCharge, Products, ProductsSimilar, Carriers, CarriersProducts, CarriersBoxes
 )
 
+# TODO: Criar a tela de pedidos com os produtos em listagem como um pedido
+#       normal
 # Register your models here.
 
 

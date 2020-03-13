@@ -11,42 +11,23 @@
  */
 
 var IndexEvents = function () {
-    var Check = null;
-    var executeInterval = function () {
-        return setInterval(function() {
-            checkChanges();
-        }, 5000);
-    }
+
+    var display_id = "{{ display_id|escapejs }}";
+
     var documentEvents = function () {
-        Check = executeInterval();
-    };
-    var checkChanges = function () {
-        clearInterval(Check);
-        let API_HOST = $('#api_host').val();
-        let API_URL = API_HOST + '/api/mqtt/check_changes/';
-        let car_id = $('#car_id').val();
-        let display_id = $('#display_id').val();
-        let command = {
-            'car_id': car_id,
-            'display_id': display_id
+
+        var chatSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/display/' + display_id + '/'
+        );
+
+        chatSocket.onmessage = checkCommands;
+        chatSocket.onclose = function(e) {
+            console.error('Display socket closed unexpectedly');
         };
-        $.ajax({
-            type: "GET",
-            url: API_URL,
-            data: command,
-            dataType: 'json',
-            success: function(msg) {
-                if ((msg.data) && (msg.data.length > 0))
-                    checkCommands(msg.data);
-                Check = executeInterval();
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                let msg = 'Um erro ocorreu ao chamar a API: status(' + textStatus + ') erro( ' + errorThrown + ')';
-                console.log('erro....', msg);
-            }
-        });
     };
-    var checkCommands = function(data_array) {
+    var checkCommands = function(e) {
+        let data_array = JSON.parse(e.data);
         for (let i = 0; i < data_array.length; i++) {
             if (data_array[i].box_type_command == 'control')
                 set_display_controls(data_array[i].box_message);

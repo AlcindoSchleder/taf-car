@@ -18,7 +18,19 @@ var IndexEvents = function () {
         2: 'text-success'
     }
 
+    var display_id = "{{ display_id|escapejs }}";
+
     var documentEvents = function () {
+        var chatSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/display/' + display_id + '/'
+        );
+
+        chatSocket.onmessage = checkCommands;
+        chatSocket.onclose = function(e) {
+            console.error('Display socket closed unexpectedly');
+        };
+
         $('#form_boxes input').on('keypress', function (e) {
             let keycode = (e.keyCode ? e.keyCode : e.which);
             if (keycode == '13') {
@@ -37,41 +49,27 @@ var IndexEvents = function () {
         $('#form_boxes input').focusin(function (e) {
             let display = $(this).attr('name');
             let car_id = $('.car_id').html()
-            manageDisplay('control', car_id, display, 'display_enable');
+            manageDisplay(chatSocket, 'control', car_id, display, 'display_enable')
         });
         $('#form_boxes input').focusout(function (e) {
             let display = $(this).attr('name');
             let value = $(this).val();
             let car_id = $('.car_id').html()
-            manageDisplay('setbox', car_id, display, value);
-            manageDisplay('control', car_id, display, 'display_disable');
+            manageDisplay(chatSocket, 'setbox', car_id, display, value)
+            manageDisplay(chatSocket, 'control', car_id, display, 'display_disable')
         });
         $('#e21').focus();
         $('#e21').select();
     };
-    var manageDisplay = function (command_type, car_id, display, message) {
-        let API_HOST = $('#api_host').val();
-        let API_URL = API_HOST + '/api/mqtt/send_message/';
-        let command = {
-            'type': command_type,
-            'car_id': car_id,
-            'display': display,
-            'message': message
-        };
-        console.log('call: ', API_URL);
-        $.ajax({
-            type: "GET",
-            url: API_URL,
-            data: command,
-            dataType: 'json',
-            success: function(d) {
-                console.log(d)
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                let msg = 'Um erro ocorreu ao chamar a API: status(' + textStatus + ') erro( ' + errorThrown + ')';
-                console.log('erro....', msg);
-            }
-        });
+    var manageDisplay = function (socket, command_type, car_id, display, message) {
+        socket.send(JSON.stringify({
+            let command = {
+                'type': command_type,
+                'car_id': car_id,
+                'display': display,
+                'message': message
+            };
+        }));
     };
     var handleDynamicLinks = function () {
         $('.main-nav li a, .servicelink').bind('click', function(event) {

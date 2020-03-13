@@ -18,11 +18,6 @@ USER_NAME = None
 USER_DATA = None
 USER_PERMISSIONS = []
 
-# TODO: fix USER_PERMISSION to constant and not load when get user login
-#       FR -> Fracionados Gerais
-#       FL -> Fracionados Limpeza
-#       CO -> Confinado
-
 
 def result_dict():
     return {

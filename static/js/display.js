@@ -26,14 +26,12 @@ var IndexEvents = function () {
         };
     };
     var checkCommands = function(e) {
-        let data_array = JSON.parse(e.data);
-        console.log('received: ', data_array);
-//        for (let i = 0; i < data_array.length; i++) {
-//            if (data_array[i].box_type_command == 'control')
-//                console.log('comando de controle');group_id
-//            if (data_array[i].box_type_command == 'setbox')
-//                console.log('comando setbox');
-//        };
+        let data = JSON.parse(e.data);
+        console.log('received: ', data);
+        if (data.command == 'control')
+            set_display_controls(data.message);
+        if (data.command == 'setbox')
+            $('.box_code').html(data.message);
     }
     var set_display_controls = function (message) {
         if ((message == 'display_enable') && (!$('.shadow-page').hasClass('d-none')))

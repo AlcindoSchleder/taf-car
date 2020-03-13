@@ -23,10 +23,6 @@ var IndexEvents = function () {
     var checkCommands = function(e) {
         let data = JSON.parse(e.data);
         console.log('received: ', data);
-        if (data.command == 'control')
-            set_display_controls(data_array[i].box_message);
-        if (data.command == 'setbox')
-            $('.box_code').html(data_array[i].box_message);
     };
     var getClientSocket = function(display_id) {
         var url = 'ws://' + window.location.host + '/ws/display/' + car_id + '/' + display_id +'/'

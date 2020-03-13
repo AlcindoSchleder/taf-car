@@ -56,8 +56,10 @@ var IndexEvents = function () {
             cliSocket = getClientSocket(display_id);
             setTimeout(() => {
                 manageDisplay(cliSocket, 'control', car_id, display_id, 'display_enable');
-                cliSocket.close();
-            }, 2000)
+                setTimeout(() => {
+                    cliSocket.close();
+                }, 2000);
+            }, 2000);
         });
         $('#form_boxes input').focusout(function (e) {
             let display_id = $(this).attr('name');
@@ -67,7 +69,9 @@ var IndexEvents = function () {
             setTimeout(() => {
                 manageDisplay(cliSocket, 'setbox', car_id, display_id, value);
                 manageDisplay(cliSocket, 'control', car_id, display_id, 'display_disable');
-                cliSocket.close();
+                setTimeout(() => {
+                    cliSocket.close();
+                }, 2000);
             }, 2000)
         });
 //        $('#e21').focus();

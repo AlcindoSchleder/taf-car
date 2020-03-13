@@ -75,7 +75,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'taf_car.wsgi.application'
-ASGI_APPLICATION = "myproject.routing.application"
+ASGI_APPLICATION = "taf_car.routing.application"
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',

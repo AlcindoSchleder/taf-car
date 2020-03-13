@@ -63,12 +63,10 @@ var IndexEvents = function () {
     };
     var manageDisplay = function (socket, command_type, car_id, display, message) {
         socket.send(JSON.stringify({
-            let command = {
-                'type': command_type,
-                'car_id': car_id,
-                'display': display,
-                'message': message
-            };
+            'type': command_type,
+            'car_id': car_id,
+            'display': display,
+            'message': message
         }));
     };
     var handleDynamicLinks = function () {

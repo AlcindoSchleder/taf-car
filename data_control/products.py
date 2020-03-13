@@ -13,7 +13,7 @@ from apps.login.models import UsersOperatorsPermissions
 from apps.home.models import CarsBoxes
 from apps.carriers.models import (
     Products, ProductsSimilar, CargasProdutos, LastCharge,
-    Carriers, CarriersProducts
+    Carriers, CarriersProducts, CarriersBoxes
 )
 
 
@@ -39,7 +39,7 @@ class Consinco2Plataform:
         return api.get_data(api_name, **params)
 
     @staticmethod
-    def _create_hash_from_fields(**fields):
+    def create_hash_from_fields(**fields):
         pk = ''
         for field in fields:
             pk += str(fields[field]) + '-'
@@ -141,7 +141,7 @@ class Consinco2Plataform:
     def _convert_carrier(self, row):
         param = row.copy()
         # pk_carriers, lot, fk_customers
-        pk = self._create_hash_from_fields(
+        pk = self.create_hash_from_fields(
             pk_carriers=row["nrocarga"],
             lot=row["seqlote"],
             fk_customer=row["seqpessoa"]
@@ -168,7 +168,7 @@ class Consinco2Plataform:
         param = row.copy()
 
         # charge, fk_customers, fk_products, street and tower
-        pk = self._create_hash_from_fields(
+        pk = self.create_hash_from_fields(
             fk_carriers=row["nrocarga"],
             fk_customer=row["seqpessoa"],
             fk_products=row["seqproduto"],
@@ -335,20 +335,6 @@ class ProductDataControl:
     date_last_charge = 0
 
     @staticmethod
-    def create_data_frame():
-        charges_list = []
-        carriers = Carriers.objects.filter(flag_status='L')
-        for carrier in carriers:
-            carriers_products = CarriersProducts.objects.filter(fk_carriers=carrier.pk_carriers)
-
-            charges_dict = Cmp.queryset_to_dict(carrier)   # create a dict from carrier
-            for carrier_product in carriers_products:
-                charges_dict.update(Cmp.queryset_to_dict(carrier_product))
-                charges_list.append(charges_dict)
-
-        return pd.DataFrame(charges_list)
-
-    @staticmethod
     def _load_boxes():
         first_pk = int(str(apps.CAR_ID) + str(10))
         last_pk = int(str(apps.CAR_ID) + str(26))
@@ -368,55 +354,13 @@ class ProductDataControl:
             })
         return box_data
 
-    def _calculate_fields(self):
-        res = apps.result_dict()
-        try:
-            self.df['weight_prod'] = round(self.df['qtd_packing'] * self.df['weight'], 6)
-            self.df['volume_prod'] = round(self.df['qtd_packing'] * self.df['volume'], 6)
-        except Exception as e:
-            res['status']['sttCode'] = 500
-            res['status']['sttMsgs'] = f'Erro ao calcular o peso e o volume dos ítens! - ({e})'
+    @staticmethod
+    def _get_data_and_store_db():
+        c2p = Consinco2Plataform()
+        res = c2p.get_products_data_frame()
         return res
 
-    def _get_product_data(self, pk: int = 0, barcode: str = ''):
-        res = apps.result_dict()
-        if pk == 0 and barcode == '':
-            res['status']['sttCode'] = 403
-            res['status']['sttMsgs'] = \
-                'Erro: para buscar um produto, envie o código do ' \
-                'produto ou o código de barras do produto'
-            return res
-        product = Products()
-        similar = ProductsSimilar()
-
-        # get product data from E.R.P.
-        api = ApiHostAccess()
-        res = api.get_data('product', seqprodudo=pk)
-
-        if res and res['records']:
-            item = res['records']
-
-            # Save Product Data
-            with Cmp.PRODUCTS_MAP as PM:
-                for field in PM:
-                    if getattr(product, PM[field]):
-                        setattr(product, PM[field], item[field])
-            product.save()
-
-            # Save Product Similar Data
-            with Cmp.PRODUCTS_SIMILAR_MAP as PSM:
-                for field in PSM:
-                    if getattr(similar, PSM[field]):
-                        setattr(similar, PSM[field], item[field])
-            similar.save()
-
-        # set product and similar to dictionary then return it
-        item = Cmp.queryset_to_dict(product)
-        item.update(Cmp.queryset_to_dict(similar))
-        res['data'] = item
-        return res
-
-    def set_dataframe_info(self, idx, line, charge, order, product, weight_box, volume_box):
+    def set_data_frame_info(self, idx, line, charge, order, product, weight_box, volume_box):
         self.CAR_BOXES[idx]['key'] = f'{line}|{charge}|{order}'
         self.CAR_BOXES[idx]['weight'] = weight_box
         self.CAR_BOXES[idx]['volume'] = volume_box
@@ -426,7 +370,28 @@ class ProductDataControl:
         self.df.loc[line].loc[charge].loc[order].at[product, 'weight_box'] = weight_box
         self.df.loc[line].loc[charge].loc[order].at[product, 'volume_box'] = volume_box
         self.df.loc[line].loc[charge].loc[order].at[product, 'status'] = 'S'
+
         # save charge car data
+        fk_carriers_products =  self.df.loc[line].loc[charge].loc[order].at[product, 'pk_carriers_products']
+        fk_cars_boxes = str(apps.CAR_ID) + self.CAR_BOXES[idx]['name']
+        pk = Consinco2Plataform.create_hash_from_fields(
+            fk_carriers_products=fk_carriers_products,
+            fk_users=str(apps.USER_NAME),
+            fk_cars_boxes=fk_cars_boxes
+        )
+
+        carrier_box_data = {
+            'pk_carrier_boxes': pk,
+            'fk_carriers_products_id': fk_carriers_products,
+            'fk_cars_id': apps.CAR_ID,
+            'fk_cars_boxes_id': fk_cars_boxes,
+            'fk_users_id': str(apps.USER_NAME),
+            'weight_box': weight_box,
+            'volume_box': volume_box,
+            'insert_date': timezone.now()
+        }
+        carrier_box = CarriersBoxes(**carrier_box_data)
+        carrier_box.save()
         # self._save_product_original(line, charge, order, product, 'S')
 
     def _set_boxes_charge(self):
@@ -477,25 +442,23 @@ class ProductDataControl:
 
             # apply rules
             if sum_weight < apps.BOX_MAX_WEIGHT or sum_volume < apps.BOX_MAX_VOLUME:
-                self.set_dataframe_info(box_idx, line, charge, order, product, sum_weight, sum_volume)
+                self.set_data_frame_info(box_idx, line, charge, order, product, sum_weight, sum_volume)
             else:
                 box_idx += 1
                 if box_idx < apps.MAX_BOXES:
-                    self.set_dataframe_info(box_idx, line, charge, order, product, sum_weight, sum_volume)
+                    self.set_data_frame_info(box_idx, line, charge, order, product, sum_weight, sum_volume)
                 sum_weight = weight_prod
                 sum_volume = volume_prod
             # else:
-            # TODO: o peso ou o volume do pedido é maior que o peso ou o volume máximo permitido
-            #       descontroi pedido e soma-se os ítens dividindo-os em boxes que alcancem a regra estabelecida
-            #       resumindo aqui o pedido é divido em 2 ou mais caixas para satisfazer a regra de peso e volume máximo
+            # TODO: o peso ou o volume do produto pedido (qtd_pedida * volume ou peso) é maior que o peso ou
+            #       o volume máximo permitido dividimos a quantidade em partes o produto  pedido e soma-se os
+            #       ítens dividindo-os em boxes que alcancem a regra estabelecida!
+            #       resumindo aqui o pedido é divido em 2 ou mais caixas para satisfazer
+            #       a regra de peso e volume máximo
+            #       Ex: (qtd_pedida - 1) preenche o box ou vamos subtraindo até alcançar o valor mágico
             prev_line = line
             prev_charge = charge
             row_idx += 1
-
-    def _get_data_and_store_db(self):
-        c2p = Consinco2Plataform()
-        res = c2p.get_products_data_frame()
-        return res
 
     def _filter_user_product(self):
         res = apps.result_dict()

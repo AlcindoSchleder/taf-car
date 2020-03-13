@@ -24,7 +24,7 @@ class ConsincoMapping:
         'nropredio',  'nrosala', 'qtdembsolcarga', 'pesobruto', 'pesoliquido',
         'altura', 'largura', 'profundidade', 'volume', 'status',
         'nroapartamento', 'statusendereco', 'pesototallote', 'mcubtotallote',
-        'qtdembsepcarga',
+        'qtdembsepcarga', 'pk_carriers', 'pk_carriers_products',
     ]
     PRODUCTS_MAP = {
         'seqproduto': 'pk_products',

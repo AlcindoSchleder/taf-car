@@ -111,10 +111,10 @@ class HomeTestsView(TemplateView):
             footer = fd.read()
             fd.close()
 
-        apps.CAR_ID = 1
+        apps.CAR_ID = request.session['car_id']
         apps.CAR_PREPARED = 1
         apps.CAR_COLLECT_PRODUCTS = 1
-        apps.USER_NAME = 942
+        apps.USER_NAME = request.user.username
         # res = apps.result_dict()
         # if res.get('status') and res['status'].get('sttCode'):
         #     code = res['status'].get('sttCode')

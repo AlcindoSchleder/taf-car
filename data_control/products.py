@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from data_control.fields import ConsincoMapping as Cmp
 from data_control.api import ApiHostAccess
+from apps.carworker.messages import AsyncMessages
 from apps.login.models import UsersOperatorsPermissions
 from apps.home.models import CarsBoxes
 from apps.carriers.models import (
@@ -18,7 +19,7 @@ from apps.carriers.models import (
 
 
 class Consinco2Plataform:
-    FRACTIONED_PRODUCTS = ['FL', 'CO', 'FG']
+    FRACTIONED_PRODUCTS = ['LF', 'CO', 'FG']
 
     df = None
     carrier_list = []
@@ -335,7 +336,20 @@ class ProductDataControl:
     date_last_charge = 0
 
     @staticmethod
-    def _load_boxes():
+    def get_allocation_boxes():
+        pk_cars_gt = int(f'{apps.CAR_ID}10')
+        pk_cars_lt = int(f'{apps.CAR_ID}{apps.CAR_LEVELS}{apps.CAR_BOXES_LEVEL}')
+        boxes = CarsBoxes.objects.filter(pk__range=(pk_cars_gt, pk_cars_lt), fisical_box_id__isnull=False)
+        apps.CAR_PREPARED = boxes.count() == (apps.CAR_LEVELS * apps.CAR_BOXES_LEVEL)
+        if apps.CAR_PREPARED:
+            for box in boxes:
+                display_id = box.box_name
+                box_id = box.fisical_box_id
+                AsyncMessages.send_message_to_member('control', apps.CAR_ID, display_id, box_id)
+        return apps.CAR_PREPARED
+
+    @staticmethod
+    def load_boxes():
         first_pk = int(str(apps.CAR_ID) + str(10))
         last_pk = int(str(apps.CAR_ID) + str(26))
         boxes = CarsBoxes.objects.filter(pk__gt=first_pk, pk__lt=last_pk)
@@ -449,13 +463,6 @@ class ProductDataControl:
                     self.set_data_frame_info(box_idx, line, charge, order, product, sum_weight, sum_volume)
                 sum_weight = weight_prod
                 sum_volume = volume_prod
-            # else:
-            # TODO: o peso ou o volume do produto pedido (qtd_pedida * volume ou peso) é maior que o peso ou
-            #       o volume máximo permitido dividimos a quantidade em partes o produto  pedido e soma-se os
-            #       ítens dividindo-os em boxes que alcancem a regra estabelecida!
-            #       resumindo aqui o pedido é divido em 2 ou mais caixas para satisfazer
-            #       a regra de peso e volume máximo
-            #       Ex: (qtd_pedida - 1) preenche o box ou vamos subtraindo até alcançar o valor mágico
             prev_line = line
             prev_charge = charge
             row_idx += 1

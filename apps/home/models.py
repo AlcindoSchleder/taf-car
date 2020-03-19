@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import apps
 from django.db import models
+from .choices import SEPARATION_STRINGS_OPTIONS, SORT_STRINGS_OPTIONS
 
 
 class ApiHosts(models.Model):
@@ -27,6 +28,33 @@ class ApiHosts(models.Model):
     def __str__(self):
         return f'{self.dsc_host} - {self.address}:{self.port} -> {self.FLAG_ACTIVE_OPTIONS[self.flag_active][1]}'
     # TODO: Create a signal before post to check if active host is unique
+
+
+class Parameters(models.Model):
+    pk_parameters = models.SmallIntegerField(
+        primary_key=True, editable=False, default=1, verbose_name='Parâmetro'
+    )
+    car_levels = models.SmallIntegerField(default=2, verbose_name='Qtd. Níveis')
+    box_per_level = models.SmallIntegerField(default=5, verbose_name='Qtd. Caixas p/Nível')
+    box_max_weight = models.FloatField(default=30.00, verbose_name='Peso Máximo da Caixa')
+    box_max_volume = models.FloatField(default=0.054432, verbose_name='Volume Máximo da Caixa')
+    volume_percent = models.FloatField(default=30.00, verbose_name='Percentual do Volume')
+    fractioned_strings = models.TextField(verbose_name='Strings da Linha Fracionada')
+    largest_strings = models.TextField(verbose_name='Strings da Linha Grandeza')
+    load_charge_strings = models.TextField(
+        choices=SEPARATION_STRINGS_OPTIONS, verbose_name='Modo de Classificação')
+    Separation_charge_strings = models.TextField(
+        choices=SORT_STRINGS_OPTIONS, verbose_name='Modo de Separação')
+    fk_api_hosts = models.ForeignKey(
+        ApiHosts, on_delete=models.CASCADE, default=1, verbose_name='Host da API default'
+    )
+
+    class Meta:
+        db_table = 'icity_parameters'
+        verbose_name_plural = 'Parametros'
+
+    def __str__(self):
+        return f'parâmetro: {self.pk_parameters}'
 
 
 class Cars(models.Model):

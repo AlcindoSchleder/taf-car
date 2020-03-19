@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.urls import reverse
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlencode
 
 CAR_ID = 0
 CAR_PREPARED = False

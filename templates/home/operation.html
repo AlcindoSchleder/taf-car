@@ -1,0 +1,23 @@
+{%extends 'base.html'%}
+
+	{%block title%}Seletor de Usuário{%endblock%}
+	{%block content%}
+		<section class="main-page container text-center">
+			<div class="row mb-5">
+				<div class="title h5 col-12">Separação de mercadorias Inteligente - host: {{host}}</div>
+			</div>
+			<div class="row">
+				<div class="col-4"></div>
+				{% if car_id > 0 and not car_prepared %}
+				<a class="col-4 link btn btn-success service-link" href="{% url 'carriers:carriers' %}?car_prepared={{car_prepared}}&car_collect_products={{car_collect_products}}">Alocar Caçambas no Carro</a>
+				{% endif %}
+				{% if car_id > 0 and car_prepared %}
+				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar o Carro {{car_id}}</a>
+				{% endif %}
+				<div class="col-4"></div>
+			</div>
+		</section>
+	{%endblock%}
+	{% block footer %}
+		{% include 'footer.html' %}
+	{% endblock %}

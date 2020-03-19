@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.login',
     'apps.carriers',
     'apps.display',
+    'apps.carworker',
     'rest_framework',
 ]
 

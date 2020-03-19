@@ -7,14 +7,27 @@
 				<div class="title h5 col-12">Separação de mercadorias Inteligente - host: {{host}}</div>
 			</div>
 			<div class="row">
-				<div class="col-4"></div>
-				{% if car_id > 0 and not car_prepared %}
-				<a class="col-4 link btn btn-success service-link" href="{% url 'carriers:carriers' %}?car_prepared={{car_prepared}}&car_collect_products={{car_collect_products}}">Alocar Caçambas no Carro</a>
-				{% endif %}
-				{% if car_id > 0 and car_prepared %}
-				<a class="col-4 link btn btn-success service-link" href="{% url 'login:login' %}">Iniciar o Carro {{car_id}}</a>
-				{% endif %}
-				<div class="col-4"></div>
+				<div class="col-12">
+					<form class="form-register" id="register" method="POST">
+						{% csrf_token %}
+						<div class="msg mb-5 h3">
+							Seleção para Clasificação
+							{% include 'home/form_error_msg.html' %}
+						</div>
+						{% for field in form %}
+						<div class="row text-center form-group">
+							<div class="col-2"></div>
+							<div class="col-3 text-right"><i class="fas fa-user"></i>{{field.label}}: </div>
+							<div class="col-3">{{field}}</div>
+						</div>
+						{% endfor %}
+						<div class="row text-center btn-send m-3">
+							<div class="col-12">
+								<button class="btn btn-outline-danger" type="submit">SELECIONAR</button>
+							</div>
+						</div>
+					</form>
+				</div>
 			</div>
 		</section>
 	{%endblock%}

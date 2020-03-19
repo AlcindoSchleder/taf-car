@@ -4,16 +4,14 @@ import json
 
 
 class DisplayConsumer(AsyncWebsocketConsumer):
-    display_id = ''
+    user_id = ''
     car_id = ''
     group_id = ''
-    channel_name = ''
 
     async def connect(self):
-        self.display_id = self.scope['url_route']['kwargs']['display_id']
+        self.user_id = self.scope['url_route']['kwargs']['user_id']
         self.car_id = self.scope['url_route']['kwargs']['car_id']
-        self.group_id = f'display_{self.car_id}'
-        self.channel_name = f'display_{self.car_id}_{self.display_id}'
+        self.group_id = f'display_{self.car_id}_{self.user_id}'
 
         # Join room group
         await self.channel_layer.group_add(
@@ -38,7 +36,7 @@ class DisplayConsumer(AsyncWebsocketConsumer):
         display_id = text_data_json['display']
         message = text_data_json['message']
 
-        # Send message to display if display_id = none send to group 'car_id'
+        # Send message to display
         await self.channel_layer.group_send(
             self.group_id,
             {

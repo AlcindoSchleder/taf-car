@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.urls import path
-from . import consumers
+from .consumers import DisplayConsumer
 
-websocket_urlpatterns = [
-    path('ws/display/<car_id>/', consumers.DisplayConsumer),
-    path('ws/display/<car_id>/<display_id>/', consumers.DisplayConsumer),
+display_urlpatterns = [
+    path('ws/car/<car_id>/', DisplayConsumer),
+    path('ws/display/<car_id>/<display_id>/', DisplayConsumer),
 ]

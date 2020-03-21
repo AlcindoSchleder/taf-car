@@ -15,30 +15,44 @@ var IndexEvents = function () {
     var car_id = $('#car_id').val();
     var display_id = $('#display_id').val();
 
-    var documentEvents = function () {
-        var url = 'ws://' + window.location.host + '/ws/display/' + car_id + '/' + display_id + '/'
-        console.log('creating a websocket to: ', url);
-        var chatSocket = new WebSocket(url);
+    var wsGroup = null
+    var wsMember = null
 
-        chatSocket.onmessage = checkCommands;
-        chatSocket.onclose = function(e) {
-            console.error('Display socket closed unexpectedly');
-        };
-    };
-    var checkCommands = function(e) {
-        let data = JSON.parse(e.data);
-        console.log('received: ', data);
-        if (data.command == 'control')
-            set_display_controls(data.message);
-        if (data.command == 'setbox')
-            $('.box_code').html(data.message);
-    }
     var set_display_controls = function (message) {
+        console.log('setting display controls');
         if ((message == 'display_enable') && (!$('.shadow-page').hasClass('d-none')))
             $('.shadow-page').addClass('d-none');
         if ((message == 'display_disable') && ($('.shadow-page').hasClass('d-none')))
             $('.shadow-page').removeClass('d-none');
     }
+    var checkCommands = function(e) {
+        let data = JSON.parse(e.data);
+        console.log('receiving: ', data);
+        console.log('checking command:', data.command);
+        console.log('checking message:', data.message);
+        if (data.command == 'control')
+            set_display_controls(data.message);
+        if (data.command == 'setbox') {
+            console.log('setting display box code');
+            $('.box_code').html(data.message);
+        }
+    }
+    var onCloseSocket = function (e) {
+        console.error('Display socket closed unexpectedly', e);
+    }
+    var socketConnect = function(socket, url) {
+        console.log('Connecting to:', url)
+        socket = new WebSocket(url);
+        socket.onmessage = checkCommands;
+        socket.onclose = onCloseSocket;
+    }
+    var documentEvents = function () {
+        socketConnect(wsGroup, 'ws://' + window.location.host + '/ws/car/' + car_id + '/')
+        socketConnect(wsMember, 'ws://' + window.location.host + '/ws/display/' + car_id + '/' + display_id + '/')
+        $('.btnTeste').on('click', (e) => {
+            $('.shadow-page').removeClass('d-none');
+        })
+    };
     var handleDynamicLinks = function () {
     };
     var serializerJson = function(form) {

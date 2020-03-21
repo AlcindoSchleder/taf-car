@@ -6,8 +6,8 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from urllib.parse import urlparse
-from .models import Cars, CarsBoxes
-from data_control.products import ProductDataControl
+from .models import Cars
+from apps.carworker.products import ProductDataControl
 from .forms import ClassificationChargesForm
 
 

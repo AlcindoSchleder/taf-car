@@ -31,13 +31,9 @@ class DisplayPageView(TemplateView):
         request.session['display_id'] = display_id
         request.session['car_id'] = car_id
 
-        show_display = ''
-        if 'show_display' in request.GET.keys():
-            show_display = request.GET.get('show_display')
         params = {
             'car_id': car_id,
             'display_id': display_id,
-            'show_display': show_display,
             'host': host
         }
         return render(request, self.template_name, params)

@@ -3,19 +3,20 @@ import os
 import hashlib
 import apps
 import pandas as pd
+import time
 
 from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from data_control.fields import ConsincoMapping as Cmp
-from data_control.api import ApiHostAccess
-from apps.carworker.messages import AsyncMessages
 from apps.login.models import UsersOperatorsPermissions
 from apps.home.models import CarsBoxes
 from apps.carriers.models import (
     Products, ProductsSimilar, CargasProdutos, LastCharge,
     Carriers, CarriersProducts, CarriersBoxes
 )
+from .fields import ConsincoMapping as Cmp
+from .api import ApiHostAccess
+from .controller import AsyncMessages
 
 
 class Consinco2Plataform:
@@ -341,11 +342,19 @@ class ProductDataControl:
         pk_cars_lt = int(f'{apps.CAR_ID}{apps.CAR_LEVELS}{apps.CAR_BOXES_LEVEL}')
         boxes = CarsBoxes.objects.filter(pk__range=(pk_cars_gt, pk_cars_lt), fisical_box_id__isnull=False)
         apps.CAR_PREPARED = boxes.count() == (apps.CAR_LEVELS * apps.CAR_BOXES_LEVEL)
-        if apps.CAR_PREPARED:
-            for box in boxes:
-                display_id = box.box_name
-                box_id = box.fisical_box_id
-                AsyncMessages.send_message_to_member('control', apps.CAR_ID, display_id, box_id)
+
+        try:
+            if apps.CAR_PREPARED:
+                for box in boxes:
+                    display_id = box.box_name
+                    box_id = box.fisical_box_id
+                    AsyncMessages.send_message_to_member(
+                        'setbox', apps.CAR_ID, display_id, box_id
+                    )
+        except Exception as e:
+            print(f'Erro: {e}')
+        # TODO: Gerar um log de todos os prints e erros no syslog
+        # AsyncMessages.send_message_to_member('control', apps.CAR_ID, 'e' + '21', 'display_disabled')
         return apps.CAR_PREPARED
 
     @staticmethod

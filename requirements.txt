@@ -24,7 +24,6 @@ numpy==1.18.1
 oauthlib==3.1.0
 paho-mqtt==1.5.0
 pandas==1.0.0
-pkg-resources==0.0.0
 public==2019.4.13
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
